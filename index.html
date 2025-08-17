@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Mini‑Nation (Lite)</title>
+<style>
+  :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--border:#1f2937;--p:#06b6d4;--ai:#f43f5e;--n:#64748b;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:#fff;font:15px/1.5 system-ui,Segoe UI,Arial}
+  header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);backdrop-filter:blur(8px);position:sticky;top:0;background:#0f172acc}
+  .brand{display:flex;gap:8px;align-items:center}.pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cbd5e1;font-size:12px}
+  .wrap{max-width:1000px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:900px){.wrap{grid-template-columns: 640px 1fr}}
+  canvas{width:100%;height:auto;background:linear-gradient(#0b1426,#0a1630);border:1px solid var(--border);border-radius:14px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:#142033;color:#dbeafe;border-radius:10px;padding:8px 10px;cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn:hover{filter:brightness(1.08)}
+  .stat{background:#0f2036;border:1px solid #22324a;border-radius:10px;padding:6px 8px}
+  .muted{color:var(--muted)} h3{margin:8px 0}
+  .ownerP{color:#67e8f9}.ownerA{color:#fecaca}.ownerN{color:#cbd5e1}
+  .hint{font-size:12px;color:#9fb9d6}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span>🗺️</span><strong>Mini‑Nation (Lite)</strong></div>
+  <div class="row">
+    <span id="turnPill" class="pill">الدور: 1</span>
+    <span id="ownPill"  class="pill">أقاليمك: 0</span>
+    <span id="moneyPill" class="pill">الذهب: 0</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <canvas id="map" width="640" height="440"></canvas>
+
+  <div class="panel">
+    <h3>لوحة السيطرة</h3>
+    <div id="info" class="muted">اضغط على إقليمك لاختياره. اضغط على جارٍ لهجوم/تركيز.</div>
+    <div class="row" style="margin:8px 0">
+      <button id="btnTrain" class="btn">تدريب +2 (5💰)</button>
+      <button id="btnInvest" class="btn">استثمار +1 صناعة (6💰)</button>
+      <button id="btnAttack" class="btn" disabled>هجوم</button>
+      <button id="btnEnd" class="btn">إنهاء الدور</button>
+      <button id="btnNew" class="btn">بداية جديدة</button>
+    </div>
+    <div class="row">
+      <div class="stat">🎖️ قوات الإقليم: <b id="stTroops">—</b></div>
+      <div class="stat">🏭 صناعة: <b id="stInd">—</b></div>
+      <div class="stat">🛡️ دفاع: <b id="stDef">—</b></div>
+      <div class="stat">👥 سكان: <b id="stPop">—</b></div>
+    </div>
+    <p class="hint">الفوز عند امتلاك ≥ 60٪ من الأقاليم. الهجوم يستهلك نصف قوات الإقليم كمهاجمين.</p>
+  </div>
+
+  <div class="panel">
+    <h3>الوضع العام</h3>
+    <div id="log" class="muted" style="min-height:42px">جاهز.</div>
+    <div class="row">
+      <div class="stat ownerP">أنت: <b id="pOwn">—</b> أقاليم</div>
+      <div class="stat ownerA">الخصم: <b id="aOwn">—</b></div>
+      <div class="stat ownerN">محايد: <b id="nOwn">—</b></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ==== MAP DATA (24 إقليماً، اتصالات ثابتة) ====
+  const W=640,H=440;
+  const nodes=[
+    {x:90,y:90},{x:160,y:70},{x:230,y:90},{x:300,y:70},{x:370,y:90},{x:440,y:70},
+    {x:510,y:90},{x:560,y:120},{x:520,y:170},{x:450,y:170},{x:380,y:170},{x:310,y:170},
+    {x:240,y:170},{x:170,y:170},{x:100,y:170},{x:70,y:220},{x:140,y:230},{x:210,y:240},
+    {x:280,y:250},{x:350,y:240},{x:420,y:230},{x:490,y:240},{x:560,y:260},{x:300,y:320},
+  ];
+  const adj=[
+    [1,14],[0,2,13],[1,3,12],[2,4,11],[3,5,10],[4,6,9],[5,7],[6,8],[7,9,21],[5,8,10],
+    [4,9,11,20],[3,10,12,19],[2,11,13,18],[1,12,14,16],[0,13,15],[14,16],[13,15,17],[16,18],
+    [17,19,23],[11,18,20,23],[10,19,21],[8,20,22],[21],[18,19]
+  ];
+
+  // owners: 0 player, 1 AI, 2 neutral
+  const OWN_COL={0:'#06b6d4',1:'#f43f5e',2:'#64748b'};
+  const OUTLINE='#0f273f';
+
+  const N=nodes.length;
+  let prov=Array.from({length:N}, (_,i)=>({
+    owner: i%3===0?0 : (i%3===1?1:2),
+    troops: 2 + (i%3===0 ? 2:0),
+    ind: (i%5===0)?2:1,
+    def: (i%4===0)?2:1,
+    pop: 3 + (i%6===0?2:0),
+  }));
+
+  // economy
+  let turn=1;
+  let moneyP=15, moneyA=15;
+
+  // selection
+  let selFrom=null, selTo=null;
+
+  // canvas
+  const cv=document.getElementById('map');
+  const ctx=cv.getContext('2d');
+
+  // UI refs
+  const info=document.getElementById('info');
+  const log=document.getElementById('log');
+  const turnPill=document.getElementById('turnPill');
+  const ownPill=document.getElementById('ownPill');
+  const moneyPill=document.getElementById('moneyPill');
+  const stTroops=document.getElementById('stTroops');
+  const stInd=document.getElementById('stInd');
+  const stDef=document.getElementById('stDef');
+  const stPop=document.getElementById('stPop');
+  const pOwn=document.getElementById('pOwn');
+  const aOwn=document.getElementById('aOwn');
+  const nOwn=document.getElementById('nOwn');
+  const btnTrain=document.getElementById('btnTrain');
+  const btnInvest=document.getElementById('btnInvest');
+  const btnAttack=document.getElementById('btnAttack');
+  const btnEnd=document.getElementById('btnEnd');
+  const btnNew=document.getElementById('btnNew');
+
+  // ====== DRAW ======
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // edges
+    ctx.lineWidth=2;
+    for(let i=0;i<N;i++){
+      for(const j of adj[i]) if(j>i){
+        ctx.strokeStyle='#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x,nodes[i].y);
+        ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    // nodes
+    for(let i=0;i<N;i++){
+      const p=prov[i]; const {x,y}=nodes[i];
+      const r=(selFrom===i||selTo===i)? 16:13;
+      // glow
+      ctx.fillStyle=OWN_COL[p.owner]+'33';
+      ctx.beginPath(); ctx.arc(x,y,r+6,0,Math.PI*2); ctx.fill();
+      // main
+      ctx.fillStyle=OWN_COL[p.owner];
+      ctx.strokeStyle=OUTLINE;
+      ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      // text
+      ctx.fillStyle='#e2e8f0';
+      ctx.font='bold 12px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(p.troops, x, y);
+    }
+    // arrows for selection
+    if(selFrom!=null && selTo!=null){
+      const a=nodes[selFrom], b=nodes[selTo];
+      drawArrow(a.x,a.y,b.x,b.y,'#fde68a');
+    }
+  }
+  function drawArrow(x1,y1,x2,y2, col){
+    const ang=Math.atan2(y2-y1,x2-x1);
+    ctx.strokeStyle=col; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.fillStyle=col;
+    const sz=8;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - sz*Math.cos(ang-Math.PI/6), y2 - sz*Math.sin(ang-Math.PI/6));
+    ctx.lineTo(x2 - sz*Math.cos(ang+Math.PI/6), y2 - sz*Math.sin(ang+Math.PI/6));
+    ctx.closePath(); ctx.fill();
+  }
+
+  // ====== HELPERS ======
+  function inCircle(px,py,cx,cy,r){ const dx=px-cx, dy=py-cy; return dx*dx+dy*dy<=r*r; }
+  function neighbors(i){ return adj[i]; }
+  function counts(){
+    let cP=0,cA=0,cN=0;
+    for(const p of prov){ if(p.owner===0) cP++; else if(p.owner===1) cA++; else cN++; }
+    return {cP,cA,cN};
+  }
+  function income(owner){
+    let sum=0;
+    for(const p of prov) if(p.owner===owner) sum += (p.ind + p.pop);
+    return sum;
+  }
+  function refreshStats(){
+    const {cP,cA,cN}=counts();
+    turnPill.textContent='الدور: '+turn;
+    ownPill.textContent='أقاليمك: '+cP;
+    moneyPill.textContent='الذهب: '+moneyP;
+    pOwn.textContent=cP; aOwn.textContent=cA; nOwn.textContent=cN;
+  }
+  function showProv(i){
+    const p=prov[i];
+    stTroops.textContent=p.troops;
+    stInd.textContent=p.ind;
+    stDef.textContent=p.def;
+    stPop.textContent=p.pop;
+  }
+  function setLog(s){ log.textContent=s; }
+
+  // ====== INPUT ======
+  cv.addEventListener('click', (e)=>{
+    const r=cv.getBoundingClientRect();
+    const x=(e.clientX-r.left)*cv.width/r.width;
+    const y=(e.clientY-r.top)*cv.height/r.height;
+    let hit=-1;
+    for(let i=0;i<N;i++){
+      if(inCircle(x,y,nodes[i].x,nodes[i].y,16)){ hit=i; break; }
+    }
+    if(hit<0) return;
+
+    if(selFrom==null){
+      if(prov[hit].owner!==0){ setLog('اختر إقليمًا تملكه.'); return; }
+      selFrom=hit; selTo=null; showProv(hit);
+      info.innerHTML='اختر جارًا للتركيز/الهجوم أو نفّذ تدريب/استثمار.';
+    }else if(selTo==null){
+      if(hit===selFrom){ selFrom=null; selTo=null; info.textContent='تم إلغاء التحديد.'; }
+      else if(neighbors(selFrom).includes(hit)){
+        selTo=hit; showProv(hit);
+        info.innerHTML = (prov[hit].owner===0)
+          ? 'جارٍ لك، مِلْكك. يمكنك تدريبه/الاستثمار فيه بعد تحديده كمصدر.'
+          : 'جارٍ عدو/محايد. اضغط "هجوم" لاستخدام نصف قوات المصدر.';
+      }else{
+        setLog('هذا الإقليم ليس جارًا للمصدر المختار.');
+      }
+    }else{
+      // لو كان عندنا from و to واخترت نقطة جديدة
+      selFrom= (prov[hit].owner===0)? hit : selFrom;
+      selTo=null; showProv(selFrom);
+    }
+    updateButtons(); draw();
+  });
+
+  function updateButtons(){
+    btnAttack.disabled = !(selFrom!=null && selTo!=null && prov[selFrom].owner===0 && prov[selTo].owner!==0 && neighbors(selFrom).includes(selTo) && prov[selFrom].troops>=2);
+    btnTrain.disabled = !(selFrom!=null && prov[selFrom].owner===0 && moneyP>=5);
+    btnInvest.disabled = !(selFrom!=null && prov[selFrom].owner===0 && moneyP>=6);
+  }
+
+  // ====== ACTIONS ======
+  btnTrain.onclick=()=>{
+    if(selFrom==null) return;
+    const p=prov[selFrom];
+    if(p.owner!==0 || moneyP<5) return;
+    moneyP-=5; p.troops += 2; setLog('تم تدريب +2 في الإقليم المحدد.');
+    showProv(selFrom); refreshStats(); updateButtons(); draw();
+  };
+
+  btnInvest.onclick=()=>{
+    if(selFrom==null) return;
+    const p=prov[selFrom];
+    if(p.owner!==0 || moneyP<6) return;
+    moneyP-=6; p.ind += 1; setLog('استثمار +1 صناعة.');
+    showProv(selFrom); refreshStats(); updateButtons(); draw();
+  };
+
+  btnAttack.onclick=()=>{
+    if(!(selFrom!=null && selTo!=null)) return;
+    const a=prov[selFrom], d=prov[selTo];
+    if(a.owner!==0 || d.owner===0) return;
+    if(!neighbors(selFrom).includes(selTo)) return;
+    // نصف القوات يهاجم
+    const send = Math.max(1, Math.floor(a.troops/2));
+    a.troops -= send;
+
+    const atk = send * (1 + 0.15*a.ind) * (0.85 + Math.random()*0.3);
+    const def = d.troops * (1 + 0.15*d.def) * (0.85 + Math.random()*0.3);
+
+    if(atk>def){
+      // فوز
+      const remain = Math.max(1, Math.floor(send - def/(1+0.15*a.ind)));
+      d.owner=0; d.troops=remain; // استحواذ
+      setLog('✅ انتصرت! تمت السيطرة على الإقليم.');
+    }else{
+      // خسارة: المدافع يخسر شوية
+      const loss = Math.max(1, Math.floor(atk/(1+0.15*d.def)));
+      d.troops = Math.max(0, d.troops - loss);
+      setLog('❌ الهجوم فشل. المدافع خسر بعض القوات.');
+    }
+    // فحص الفوز
+    checkWin();
+    showProv(selTo); refreshStats(); updateButtons(); draw();
+  };
+
+  btnEnd.onclick=()=>{
+    // دخل الذهب
+    moneyP += income(0);
+    // نمو بسيط للقوات (صيانة)
+    for(const p of prov) if(p.owner===0) p.troops += (Math.random()<0.25?1:0);
+
+    // دور الخصم (AI)
+    aiTurn();
+
+    turn++; refreshStats(); updateButtons(); draw();
+    setLog('بدأ دور جديد.');
+  };
+
+  btnNew.onclick=()=>{ newGame(); };
+
+  function checkWin(){
+    const {cP,cA}=counts();
+    if(cP >= Math.ceil(N*0.6)) { setLog('🏆 فوز! سيطرت على أغلب الأقاليم. اضغط بداية جديدة.'); freeze(); }
+    if(cA >= Math.ceil(N*0.6)) { setLog('💀 خسرت. الخصم تمدد. اضغط بداية جديدة.'); freeze(); }
+  }
+  let frozen=false;
+  function freeze(){ frozen=true; btnAttack.disabled=btnEnd.disabled=btnTrain.disabled=btnInvest.disabled=true; }
+  function unfreeze(){ frozen=false; }
+
+  // ====== AI ======
+  function aiTurn(){
+    if(frozen) return;
+    // AI اقتصاد
+    moneyA += income(1);
+
+    // 1) لو فيه حدود ضدك، هاجم هدفًا ضعيفًا
+    const fronts=[];
+    for(let i=0;i<N;i++) if(prov[i].owner===1){
+      for(const j of adj[i]){
+        if(prov[j].owner!==1){ fronts.push({from:i,to:j}); }
+      }
+    }
+    // رتب الأهداف حسب ضعف المدافع
+    fronts.sort((A,B)=> prov[A.to].troops - prov[B.to].troops);
+
+    let acted=false;
+    for(const f of fronts){
+      const a=prov[f.from], d=prov[f.to];
+      if(a.troops>=3 && Math.random()<0.8){ // يميل للهجوم
+        const send=Math.max(1, Math.floor(a.troops/2));
+        a.troops-=send;
+        const atk = send*(1+0.15*a.ind)*(0.85+Math.random()*0.3);
+        const def = d.troops*(1+0.15*d.def)*(0.85+Math.random()*0.3);
+        if(atk>def){
+          const remain=Math.max(1, Math.floor(send - def/(1+0.15*a.ind)));
+          d.owner=1; d.troops=remain;
+          setLog('⚠️ الخصم سيطر على إقليم.');
+        }else{
+          const loss = Math.max(1, Math.floor(atk/(1+0.15*d.def)));
+          d.troops = Math.max(0, d.troops - loss);
+          setLog('الخصم هاجم وفشل جزئيًا.');
+        }
+        acted=true; break;
+      }
+    }
+
+    if(!acted){
+      // 2) لو ماهاجمش: استثمار أو تدريب
+      const aiProvIdx = prov.map((p,i)=>({p,i})).filter(x=>x.p.owner===1).map(x=>x.i);
+      if(aiProvIdx.length){
+        const k = aiProvIdx[Math.floor(Math.random()*aiProvIdx.length)];
+        const p = prov[k];
+        if(moneyA>=6 && Math.random()<0.5){ p.ind++; moneyA-=6; }
+        else if(moneyA>=5){ p.troops+=2; moneyA-=5; }
+        else { p.troops += (Math.random()<0.3?1:0); }
+      }
+    }
+    // صيانة بسيطة
+    for(const p of prov) if(p.owner===1) p.troops += (Math.random()<0.2?1:0);
+
+    checkWin();
+  }
+
+  // ====== NEW GAME ======
+  function newGame(){
+    prov=prov.map((p,i)=>({
+      owner: i%3===0?0 : (i%3===1?1:2),
+      troops: 2 + (i%3===0 ? 2:0),
+      ind: (i%5===0)?2:1,
+      def: (i%4===0)?2:1,
+      pop: 3 + (i%6===0?2:0),
+    }));
+    selFrom=selTo=null;
+    moneyP=15; moneyA=15; turn=1; unfreeze();
+    setLog('بداية جديدة.');
+    refreshStats(); updateButtons(); draw();
+  }
+
+  // init
+  refreshStats(); updateButtons(); draw(); setLog('جاهز. اختر إقليمك ثم اختر جارًا للهجوم أو نفّذ تدريب/استثمار.');
+})();
+</script>
+</body>
+      </html>
