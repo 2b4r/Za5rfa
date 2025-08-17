@@ -3,300 +3,187 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Mini‑Nation — SVG Map</title>
+<title>Agar‑Lite Online</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 <style>
-  :root{--bg:#0f172a;--panel:#0b1220;--muted:#94a3b8;--border:#1f2937;--p:#06b6d4;--ai:#f43f5e;--n:#64748b;}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:#fff;font:15px/1.5 system-ui,Segoe UI,Arial}
-  header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);backdrop-filter:blur(8px);position:sticky;top:0;background:#0f172acc}
-  .pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cbd5e1;font-size:12px}
-  .wrap{max-width:1100px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr;gap:12px}
-  @media(min-width:1000px){.wrap{grid-template-columns:680px 1fr}}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn{border:1px solid var(--border);background:#142033;color:#dbeafe;border-radius:10px;padding:8px 10px;cursor:pointer}
-  .btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.5;cursor:not-allowed}
-  svg{width:100%;height:auto;border:1px solid var(--border);border-radius:14px;background:linear-gradient(#0b1426,#0a1630)}
-  .reg{stroke:#0f273f;stroke-width:2}
-  .reg.sel{filter:drop-shadow(0 0 6px #fff6)}
-  .lbl{font:700 12px system-ui;fill:#e2e8f0;pointer-events:none}
-  .hint{font-size:12px;color:#9fb9d6}
+  :root{--bg:#0f172a;--panel:#0b1220;--muted:#94a3b8;--border:#1f2937;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:#fff;font:14px/1.5 system-ui,Segoe UI,Arial;overflow:hidden}
+  .hud{position:fixed;top:8px;left:8px;display:flex;gap:8px;align-items:center}
+  .pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cbd5e1}
+  .right{position:fixed;top:8px;right:8px;background:#0b1220;border:1px solid var(--border);border-radius:12px;padding:8px;max-width:220px}
+  #list{font-size:12px;color:#cbd5e1;max-height:40vh;overflow:auto}
+  canvas{display:block;width:100vw;height:100vh}
+  /* overlay */
+  #join{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0008;backdrop-filter:blur(4px)}
+  #card{background:#0b1220;border:1px solid var(--border);border-radius:16px;padding:16px;min-width:280px}
+  input,button{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f1b2f;color:#e2e8f0;margin-top:8px}
+  button{cursor:pointer}
+  .stick{position:fixed;bottom:18px;left:18px;width:110px;height:110px;border-radius:50%;border:1px solid #1f355a;background:#0b1220aa}
+  .stick .dot{position:absolute;left:50%;top:50%;width:44px;height:44px;border-radius:50%;transform:translate(-50%,-50%);background:#06b6d4aa}
 </style>
 </head>
 <body>
-<header>
-  <div class="row">
-    <span class="pill">🗺️ Mini‑Nation (SVG)</span>
-  </div>
-  <div class="row">
-    <span id="turnPill" class="pill">الدور: 1</span>
-    <span id="ownPill"  class="pill">أقاليمك: —</span>
-    <span id="goldPill" class="pill">الذهب: —</span>
-  </div>
-</header>
+<div class="hud">
+  <span id="fps" class="pill">— FPS</span>
+  <span id="mePill" class="pill">أنا: —</span>
+</div>
+<div class="right">
+  <div class="pill" style="display:inline-block">أونلاين: <b id="online">0</b></div>
+  <div id="list"></div>
+</div>
+<canvas id="cv"></canvas>
 
-<div class="wrap">
-  <!-- خريطة SVG بأقاليم (9 أقاليم على شكل بلاطات غير منتظمة + حدود مشتركة) -->
-  <svg id="map" viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" aria-label="map">
-    <!-- صف علوي -->
-    <path id="r0" class="reg" d="M20,20 L220,20 L210,100 L40,120 Z"/>
-    <path id="r1" class="reg" d="M220,20 L440,20 L460,110 L210,100 Z"/>
-    <path id="r2" class="reg" d="M440,20 L660,20 L640,120 L460,110 Z"/>
-    <!-- صف وسط -->
-    <path id="r3" class="reg" d="M40,120 L210,100 L230,240 L60,250 Z"/>
-    <path id="r4" class="reg" d="M210,100 L460,110 L470,250 L230,240 Z"/>
-    <path id="r5" class="reg" d="M460,110 L640,120 L620,260 L470,250 Z"/>
-    <!-- صف سفلي -->
-    <path id="r6" class="reg" d="M60,250 L230,240 L220,420 L40,400 Z"/>
-    <path id="r7" class="reg" d="M230,240 L470,250 L480,420 L220,420 Z"/>
-    <path id="r8" class="reg" d="M470,250 L620,260 L640,460 L480,420 Z"/>
-    <!-- Labels -->
-    <g id="labels" >
-      <text class="lbl" x="110" y="80">0</text>
-      <text class="lbl" x="330" y="80">0</text>
-      <text class="lbl" x="550" y="80">0</text>
-      <text class="lbl" x="120" y="190">0</text>
-      <text class="lbl" x="340" y="190">0</text>
-      <text class="lbl" x="540" y="200">0</text>
-      <text class="lbl" x="120" y="330">0</text>
-      <text class="lbl" x="340" y="340">0</text>
-      <text class="lbl" x="560" y="360">0</text>
-    </g>
-  </svg>
-
-  <div class="panel">
-    <h3>لوحة التحكم</h3>
-    <div id="info" class="hint">اضغط إقليم تملكه لتحديده، ثم اضغط إقليمًا مجاورًا للهجوم.</div>
-    <div class="row" style="margin:8px 0">
-      <button id="btnTrain"  class="btn">تدريب +2 (5💰)</button>
-      <button id="btnInvest" class="btn">استثمار +1 صناعة (6💰)</button>
-      <button id="btnAttack" class="btn" disabled>هجوم</button>
-      <button id="btnEnd"    class="btn">إنهاء الدور</button>
-      <button id="btnNew"    class="btn">بداية جديدة</button>
-    </div>
-    <div class="row">
-      <div class="pill">🎖️ قوات: <b id="stTroops">—</b></div>
-      <div class="pill">🏭 صناعة: <b id="stInd">—</b></div>
-      <div class="pill">🛡️ دفاع: <b id="stDef">—</b></div>
-      <div class="pill">👥 سكان: <b id="stPop">—</b></div>
-    </div>
-    <p id="log" class="hint" style="margin-top:8px">جاهز.</p>
-  </div>
-
-  <div class="panel">
-    <h3>الوضع العام</h3>
-    <div class="row">
-      <div class="pill" style="background:#062532;border-color:#0c445a">أنت: <b id="pOwn">—</b></div>
-      <div class="pill" style="background:#2a0e16;border-color:#5a0c1d">الخصم: <b id="aOwn">—</b></div>
-      <div class="pill" style="background:#1f2937;border-color:#0f273f">محايد: <b id="nOwn">—</b></div>
-    </div>
+<!-- join overlay -->
+<div id="join">
+  <div id="card">
+    <h3 style="margin:0 0 6px">ادخل باسمك وابدأ اللعب</h3>
+    <input id="name" placeholder="username" maxlength="16" />
+    <button id="go">ادخل</button>
+    <p style="color:#94a3b8;font-size:12px;margin-top:8px">التحكم: عصاية افتراضية (موبايل) أو الأسهم/WASD (كمبيوتر).</p>
   </div>
 </div>
 
+<!-- virtual stick -->
+<div class="stick" id="stick" hidden><div class="dot" id="dot"></div></div>
+
 <script>
-(() => {
-  // ===== ألوان الملكية =====
-  const COL_P='var(--p)', COL_A='var(--ai)', COL_N='var(--n)';
+const SERVER = "https://YOUR-APP-NAME.glitch.me"; // ← غيّرها لرابط السيرفر
 
-  // ===== بيانات الأقاليم (9) و الجوار (مشترِك حدود) =====
-  const regs=[...document.querySelectorAll('.reg')];
-  const lbls=[...document.querySelectorAll('#labels .lbl')]; // لترقيم القوات
-  const adj = {
-    0:[1,3], 1:[0,2,4], 2:[1,5],
-    3:[0,4,6],4:[1,3,5,7],5:[2,4,8],
-    6:[3,7], 7:[4,6,8], 8:[5,7]
-  };
+// ===== Connect =====
+let socket = null, myId = null, world = {w:2200,h:2200};
 
-  // owner: 0 player, 1 AI, 2 neutral
-  let prov = Array.from({length:9}, (_,i)=>({
-    owner: i%3===0?0 : (i%3===1?1:2),
-    troops: 2 + (i%3===0?2:0),
-    ind: (i%4===0)?2:1,
-    def: (i%5===0)?2:1,
-    pop: 2 + (i%3===2?1:0)
-  }));
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+function resize(){ cv.width = innerWidth*devicePixelRatio; cv.height = innerHeight*devicePixelRatio; }
+addEventListener("resize", resize, {passive:true}); resize();
 
-  // اقتصاد
-  let goldP=14, goldA=14, turn=1;
+const fpsEl = document.getElementById('fps');
+const mePill = document.getElementById('mePill');
+const onlineEl = document.getElementById('online');
+const listEl = document.getElementById('list');
 
-  // اختيار
-  let from=null, to=null;
+const state = { players: [], food: [] };
+let me = null, cam = {x:0,y:0,zoom:1};
 
-  // UI refs
-  const info=document.getElementById('info'), log=document.getElementById('log');
-  const turnPill=document.getElementById('turnPill'), ownPill=document.getElementById('ownPill'), goldPill=document.getElementById('goldPill');
-  const pOwn=document.getElementById('pOwn'), aOwn=document.getElementById('aOwn'), nOwn=document.getElementById('nOwn');
-  const stTroops=document.getElementById('stTroops'), stInd=document.getElementById('stInd'), stDef=document.getElementById('stDef'), stPop=document.getElementById('stPop');
-  const btnTrain=document.getElementById('btnTrain'), btnInvest=document.getElementById('btnInvest'), btnAttack=document.getElementById('btnAttack'), btnEnd=document.getElementById('btnEnd'), btnNew=document.getElementById('btnNew');
+function connect(name){
+  socket = io(SERVER, { transports: ["websocket"], timeout: 5000 });
 
-  // ===== أدوات =====
-  function counts(){
-    let cP=0,cA=0,cN=0;
-    for(const p of prov){ if(p.owner===0)cP++; else if(p.owner===1)cA++; else cN++; }
-    return {cP,cA,cN};
-  }
-  function income(owner){
-    let s=0; for(const p of prov) if(p.owner===owner) s += (p.ind + p.pop); return s;
-  }
-  function setFill(i){
-    regs[i].style.fill = prov[i].owner===0? getComputedStyle(document.documentElement).getPropertyValue('--p')
-      : prov[i].owner===1? getComputedStyle(document.documentElement).getPropertyValue('--ai')
-      : getComputedStyle(document.documentElement).getPropertyValue('--n');
-  }
-  function refresh(){
-    regs.forEach((r,i)=>{ setFill(i); r.classList.remove('sel'); lbls[i].textContent = prov[i].troops; });
-    if(from!=null) regs[from].classList.add('sel');
-    if(to!=null) regs[to].classList.add('sel');
-    const {cP,cA,cN}=counts();
-    pOwn.textContent=cP; aOwn.textContent=cA; nOwn.textContent=cN;
-    ownPill.textContent='أقاليمك: '+cP;
-    goldPill.textContent='الذهب: '+goldP;
-    turnPill.textContent='الدور: '+turn;
-    updateButtons();
-    showStats(from ?? to ?? 0);
-  }
-  function showStats(i){
-    const p=prov[i]||{troops:'—',ind:'—',def:'—',pop:'—'};
-    stTroops.textContent=p.troops; stInd.textContent=p.ind; stDef.textContent=p.def; stPop.textContent=p.pop;
-  }
-  function updateButtons(){
-    btnTrain.disabled = !(from!=null && prov[from].owner===0 && goldP>=5);
-    btnInvest.disabled= !(from!=null && prov[from].owner===0 && goldP>=6);
-    btnAttack.disabled = !(from!=null && to!=null && prov[from].owner===0 && prov[to].owner!==0 && adj[from].includes(to) && prov[from].troops>=2);
-  }
-  function logMsg(s){ log.textContent=s; }
-
-  // ===== تفاعل الخريطة =====
-  regs.forEach((el,i)=>{
-    el.addEventListener('click', ()=>{
-      if(from==null){
-        if(prov[i].owner!==0){ logMsg('اختر إقليم تملكه.'); return; }
-        from=i; to=null; info.textContent='اختر جارًا للتركيز/الهجوم أو استخدم تدريب/استثمار.'; showStats(i);
-      }else if(to==null){
-        if(i===from){ from=null; to=null; info.textContent='تم إلغاء التحديد.'; }
-        else if(adj[from].includes(i)){ to=i; showStats(i); info.textContent = (prov[i].owner===0)? 'جارٍ تابع لك.' : 'جارٍ عدو/محايد — جاهز للهجوم.'; }
-        else { logMsg('هذا الإقليم ليس مجاورًا للمصدر.'); }
-      }else{
-        // إذا كان already from & to، الضغط يغيّر المصدر لو ملكك
-        if(prov[i].owner===0){ from=i; to=null; showStats(i); }
-        else { to=i; showStats(i); }
-      }
-      refresh();
-    });
+  socket.on("connect", () => {
+    socket.emit("join", { name });
   });
+  socket.on("hello", (data) => { myId = data.id; world = data.world || world; });
+  socket.on("online", ({count, list}) => {
+    onlineEl.textContent = count;
+    listEl.innerHTML = list.map(p => `<div>• ${escapeHtml(p.name)} — <small>score ${p.score}</small></div>`).join("");
+  });
+  socket.on("state", (s) => {
+    state.players = s.players; state.food = s.food;
+    me = state.players.find(p => p.id === myId) || me;
+    if (me) mePill.textContent = `أنا: ${me.name} — score ${me.score}`;
+  });
+}
 
-  // ===== أزرار الإجراءات =====
-  btnTrain.onclick=()=>{
-    if(from==null) return;
-    const p=prov[from]; if(p.owner!==0||goldP<5) return;
-    p.troops+=2; goldP-=5; logMsg('تدريب +2 قوات.'); refresh();
-  };
-  btnInvest.onclick=()=>{
-    if(from==null) return;
-    const p=prov[from]; if(p.owner!==0||goldP<6) return;
-    p.ind+=1; goldP-=6; logMsg('استثمار +1 صناعة.'); refresh();
-  };
-  btnAttack.onclick=()=>{
-    if(!(from!=null&&to!=null)) return;
-    const A=prov[from], D=prov[to];
-    if(A.owner!==0||D.owner===0||!adj[from].includes(to)) return;
-    const send=Math.max(1, Math.floor(A.troops/2));
-    A.troops-=send;
-    const atk = send*(1+0.15*A.ind)*(0.85+Math.random()*0.3);
-    const def = D.troops*(1+0.15*D.def)*(0.85+Math.random()*0.3);
-    if(atk>def){
-      const remain=Math.max(1, Math.floor(send - def/(1+0.15*A.ind)));
-      D.owner=0; D.troops=remain; logMsg('✅ انتصرت وسيطرت على الإقليم.');
-    }else{
-      const loss=Math.max(1, Math.floor(atk/(1+0.15*D.def)));
-      D.troops=Math.max(0, D.troops - loss); logMsg('❌ الهجوم فشل جزئيًا.');
-    }
-    checkWin(); refresh();
-  };
+function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m])); }
 
-  btnEnd.onclick=()=>{
-    // دخلك
-    goldP += income(0);
-    for(const p of prov) if(p.owner===0 && Math.random()<0.25) p.troops++;
+// ===== Input (keyboard + virtual stick) =====
+const input = {dx:0, dy:0};
+addEventListener("keydown", e => {
+  if(["ArrowUp","w","W"].includes(e.key)) input.dy=-1;
+  if(["ArrowDown","s","S"].includes(e.key)) input.dy= 1;
+  if(["ArrowLeft","a","A"].includes(e.key)) input.dx=-1;
+  if(["ArrowRight","d","D"].includes(e.key)) input.dx= 1;
+  sendInput();
+});
+addEventListener("keyup", e => {
+  if(["ArrowUp","w","W","ArrowDown","s","S"].includes(e.key)) input.dy=0;
+  if(["ArrowLeft","a","A","ArrowRight","d","D"].includes(e.key)) input.dx=0;
+  sendInput();
+});
 
-    // دور الخصم
-    aiTurn();
+// Virtual joystick (mobile)
+const stick = document.getElementById('stick'), dot = document.getElementById('dot');
+let dragging=false, center={x:0,y:0};
+function startStick(e){ dragging=true; stick.hidden=false; const t=e.touches?e.touches[0]:e; center={x:t.clientX,y:t.clientY}; stick.style.left=(center.x-55)+'px'; stick.style.top=(center.y-55)+'px'; moveStick(e); }
+function moveStick(e){
+  if(!dragging) return;
+  const t=e.touches?e.touches[0]:e;
+  const dx=t.clientX-center.x, dy=t.clientY-center.y;
+  const len=Math.hypot(dx,dy); const max=40;
+  const nx = len? dx/len : 0, ny = len? dy/len : 0;
+  dot.style.transform=`translate(${(nx*max)}px, ${(ny*max)}px)`;
+  input.dx = Math.max(-1, Math.min(1, nx));
+  input.dy = Math.max(-1, Math.min(1, ny));
+  sendInput();
+}
+function endStick(){ dragging=false; input.dx=input.dy=0; dot.style.transform='translate(-50%,-50%)'; stick.hidden=true; sendInput(); }
+addEventListener('pointerdown', startStick);
+addEventListener('pointermove', moveStick);
+addEventListener('pointerup', endStick);
+addEventListener('touchstart', startStick, {passive:false});
+addEventListener('touchmove', moveStick, {passive:false});
+addEventListener('touchend', endStick, {passive:false});
 
-    turn++; logMsg('بدأ دور جديد.'); refresh();
-  };
+function sendInput(){
+  if (socket && socket.connected) socket.emit("input", input);
+}
 
-  btnNew.onclick=()=>{ newGame(); };
+// ===== Render =====
+let last=performance.now(), frames=0, fps=0;
+function loop(ts){
+  frames++; if (ts-last>1000){ fps=frames; frames=0; last=ts; fpsEl.textContent=fps+" FPS"; }
+  draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
 
-  // ===== فوز/خسارة =====
-  function checkWin(){
-    const {cP,cA}=counts();
-    if(cP>=6){ logMsg('🏆 فوز — سيطرت على أغلب الأقاليم!'); disableAll(); }
-    if(cA>=6){ logMsg('💀 خسارة — الخصم تمدد!'); disableAll(); }
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // camera follows me
+  let targetZoom = 1;
+  if (me) {
+    cam.x = me.x; cam.y = me.y;
+    targetZoom = Math.max(0.4, Math.min(1.2, 80 / Math.sqrt(me.r)));
   }
-  function disableAll(){
-    btnTrain.disabled=btnInvest.disabled=btnAttack.disabled=btnEnd.disabled=true;
-    regs.forEach(r=>r.style.pointerEvents='none');
-  }
+  cam.zoom += (targetZoom - cam.zoom) * 0.1;
 
-  // ===== ذكاء الخصم بسيط =====
-  function aiTurn(){
-    goldA += income(1);
-    // يحاول يهاجم أضعف جار
-    let moves=[];
-    for(let i=0;i<9;i++) if(prov[i].owner===1){
-      for(const j of adj[i]) if(prov[j].owner!==1){
-        moves.push({from:i,to:j});
-      }
-    }
-    moves.sort((A,B)=> prov[A.to].troops - prov[B.to].troops);
-    let acted=false;
-    for(const m of moves){
-      const a=prov[m.from], d=prov[m.to];
-      if(a.troops>=3 && Math.random()<0.8){
-        const send=Math.max(1, Math.floor(a.troops/2));
-        a.troops-=send;
-        const atk = send*(1+0.15*a.ind)*(0.85+Math.random()*0.3);
-        const def = d.troops*(1+0.15*d.def)*(0.85+Math.random()*0.3);
-        if(atk>def){
-          const remain=Math.max(1, Math.floor(send - def/(1+0.15*a.ind)));
-          d.owner=1; d.troops=remain; logMsg('⚠️ الخصم سيطر على إقليم.');
-        }else{
-          const loss=Math.max(1, Math.floor(atk/(1+0.15*d.def)));
-          d.troops=Math.max(0, d.troops - loss); logMsg('الخصم هاجم وفشل جزئيًا.');
-        }
-        acted=true; break;
-      }
-    }
-    if(!acted){
-      // استثمار/تدريب
-      const aiIdx = prov.map((p,i)=>[p,i]).filter(x=>x[0].owner===1).map(x=>x[1]);
-      if(aiIdx.length){
-        const k=aiIdx[Math.floor(Math.random()*aiIdx.length)];
-        const p=prov[k];
-        if(goldA>=6 && Math.random()<0.5){ p.ind++; goldA-=6; }
-        else if(goldA>=5){ p.troops+=2; goldA-=5; }
-        else if(Math.random()<0.3){ p.troops++; }
-      }
-    }
-    checkWin();
+  const dpr = devicePixelRatio||1;
+  ctx.save();
+  ctx.translate(cv.width/2, cv.height/2);
+  ctx.scale(cam.zoom*dpr, cam.zoom*dpr);
+  ctx.translate(-cam.x, -cam.y);
+
+  // background grid
+  ctx.strokeStyle = "#0d1b2a";
+  ctx.lineWidth = 1;
+  for (let x=0;x<=world.w;x+=100){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,world.h); ctx.stroke(); }
+  for (let y=0;y<=world.h;y+=100){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(world.w,y); ctx.stroke(); }
+
+  // food
+  for (const f of state.food){
+    ctx.fillStyle = "#ffd166";
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.fill();
   }
 
-  // ===== لعبة جديدة =====
-  function newGame(){
-    prov = Array.from({length:9}, (_,i)=>({
-      owner: i%3===0?0 : (i%3===1?1:2),
-      troops: 2 + (i%3===0?2:0),
-      ind: (i%4===0)?2:1,
-      def: (i%5===0)?2:1,
-      pop: 2 + (i%3===2?1:0)
-    }));
-    regs.forEach(r=>r.style.pointerEvents='auto');
-    goldP=14; goldA=14; turn=1; from=null; to=null;
-    logMsg('بداية جديدة.'); refresh();
+  // players
+  for (const p of state.players){
+    ctx.save();
+    ctx.shadowColor = p.color+"55"; ctx.shadowBlur = 12;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // name
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 14px system-ui"; ctx.textAlign="center";
+    ctx.fillText(p.name, p.x, p.y - p.r - 10);
+    ctx.restore();
   }
 
-  // ===== بدء =====
-  refresh(); logMsg('جاهز: اختر إقليمك ثم جارًا للهجوم أو استخدم تدريب/استثمار.');
-})();
+  ctx.restore();
+}
+
+// ===== Join UI =====
+document.getElementById('go').onclick = () => {
+  const name = document.getElementById('name').value.trim() || "Player";
+  document.getElementById('join').style.display = 'none';
+  connect(name);
+};
 </script>
 </body>
 </html>
