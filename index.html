@@ -1,389 +1,302 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Mini‑Nation (Lite)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>Mini‑Nation — SVG Map</title>
 <style>
-  :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--border:#1f2937;--p:#06b6d4;--ai:#f43f5e;--n:#64748b;}
+  :root{--bg:#0f172a;--panel:#0b1220;--muted:#94a3b8;--border:#1f2937;--p:#06b6d4;--ai:#f43f5e;--n:#64748b;}
   *{box-sizing:border-box} body{margin:0;background:var(--bg);color:#fff;font:15px/1.5 system-ui,Segoe UI,Arial}
   header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);backdrop-filter:blur(8px);position:sticky;top:0;background:#0f172acc}
-  .brand{display:flex;gap:8px;align-items:center}.pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cbd5e1;font-size:12px}
-  .wrap{max-width:1000px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr;gap:12px}
-  @media(min-width:900px){.wrap{grid-template-columns: 640px 1fr}}
-  canvas{width:100%;height:auto;background:linear-gradient(#0b1426,#0a1630);border:1px solid var(--border);border-radius:14px}
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
+  .pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cbd5e1;font-size:12px}
+  .wrap{max-width:1100px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:1000px){.wrap{grid-template-columns:680px 1fr}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .btn{border:1px solid var(--border);background:#142033;color:#dbeafe;border-radius:10px;padding:8px 10px;cursor:pointer}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  .btn:hover{filter:brightness(1.08)}
-  .stat{background:#0f2036;border:1px solid #22324a;border-radius:10px;padding:6px 8px}
-  .muted{color:var(--muted)} h3{margin:8px 0}
-  .ownerP{color:#67e8f9}.ownerA{color:#fecaca}.ownerN{color:#cbd5e1}
+  .btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.5;cursor:not-allowed}
+  svg{width:100%;height:auto;border:1px solid var(--border);border-radius:14px;background:linear-gradient(#0b1426,#0a1630)}
+  .reg{stroke:#0f273f;stroke-width:2}
+  .reg.sel{filter:drop-shadow(0 0 6px #fff6)}
+  .lbl{font:700 12px system-ui;fill:#e2e8f0;pointer-events:none}
   .hint{font-size:12px;color:#9fb9d6}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><span>🗺️</span><strong>Mini‑Nation (Lite)</strong></div>
+  <div class="row">
+    <span class="pill">🗺️ Mini‑Nation (SVG)</span>
+  </div>
   <div class="row">
     <span id="turnPill" class="pill">الدور: 1</span>
-    <span id="ownPill"  class="pill">أقاليمك: 0</span>
-    <span id="moneyPill" class="pill">الذهب: 0</span>
+    <span id="ownPill"  class="pill">أقاليمك: —</span>
+    <span id="goldPill" class="pill">الذهب: —</span>
   </div>
 </header>
 
 <div class="wrap">
-  <canvas id="map" width="640" height="440"></canvas>
+  <!-- خريطة SVG بأقاليم (9 أقاليم على شكل بلاطات غير منتظمة + حدود مشتركة) -->
+  <svg id="map" viewBox="0 0 680 480" xmlns="http://www.w3.org/2000/svg" aria-label="map">
+    <!-- صف علوي -->
+    <path id="r0" class="reg" d="M20,20 L220,20 L210,100 L40,120 Z"/>
+    <path id="r1" class="reg" d="M220,20 L440,20 L460,110 L210,100 Z"/>
+    <path id="r2" class="reg" d="M440,20 L660,20 L640,120 L460,110 Z"/>
+    <!-- صف وسط -->
+    <path id="r3" class="reg" d="M40,120 L210,100 L230,240 L60,250 Z"/>
+    <path id="r4" class="reg" d="M210,100 L460,110 L470,250 L230,240 Z"/>
+    <path id="r5" class="reg" d="M460,110 L640,120 L620,260 L470,250 Z"/>
+    <!-- صف سفلي -->
+    <path id="r6" class="reg" d="M60,250 L230,240 L220,420 L40,400 Z"/>
+    <path id="r7" class="reg" d="M230,240 L470,250 L480,420 L220,420 Z"/>
+    <path id="r8" class="reg" d="M470,250 L620,260 L640,460 L480,420 Z"/>
+    <!-- Labels -->
+    <g id="labels" >
+      <text class="lbl" x="110" y="80">0</text>
+      <text class="lbl" x="330" y="80">0</text>
+      <text class="lbl" x="550" y="80">0</text>
+      <text class="lbl" x="120" y="190">0</text>
+      <text class="lbl" x="340" y="190">0</text>
+      <text class="lbl" x="540" y="200">0</text>
+      <text class="lbl" x="120" y="330">0</text>
+      <text class="lbl" x="340" y="340">0</text>
+      <text class="lbl" x="560" y="360">0</text>
+    </g>
+  </svg>
 
   <div class="panel">
-    <h3>لوحة السيطرة</h3>
-    <div id="info" class="muted">اضغط على إقليمك لاختياره. اضغط على جارٍ لهجوم/تركيز.</div>
+    <h3>لوحة التحكم</h3>
+    <div id="info" class="hint">اضغط إقليم تملكه لتحديده، ثم اضغط إقليمًا مجاورًا للهجوم.</div>
     <div class="row" style="margin:8px 0">
-      <button id="btnTrain" class="btn">تدريب +2 (5💰)</button>
+      <button id="btnTrain"  class="btn">تدريب +2 (5💰)</button>
       <button id="btnInvest" class="btn">استثمار +1 صناعة (6💰)</button>
       <button id="btnAttack" class="btn" disabled>هجوم</button>
-      <button id="btnEnd" class="btn">إنهاء الدور</button>
-      <button id="btnNew" class="btn">بداية جديدة</button>
+      <button id="btnEnd"    class="btn">إنهاء الدور</button>
+      <button id="btnNew"    class="btn">بداية جديدة</button>
     </div>
     <div class="row">
-      <div class="stat">🎖️ قوات الإقليم: <b id="stTroops">—</b></div>
-      <div class="stat">🏭 صناعة: <b id="stInd">—</b></div>
-      <div class="stat">🛡️ دفاع: <b id="stDef">—</b></div>
-      <div class="stat">👥 سكان: <b id="stPop">—</b></div>
+      <div class="pill">🎖️ قوات: <b id="stTroops">—</b></div>
+      <div class="pill">🏭 صناعة: <b id="stInd">—</b></div>
+      <div class="pill">🛡️ دفاع: <b id="stDef">—</b></div>
+      <div class="pill">👥 سكان: <b id="stPop">—</b></div>
     </div>
-    <p class="hint">الفوز عند امتلاك ≥ 60٪ من الأقاليم. الهجوم يستهلك نصف قوات الإقليم كمهاجمين.</p>
+    <p id="log" class="hint" style="margin-top:8px">جاهز.</p>
   </div>
 
   <div class="panel">
     <h3>الوضع العام</h3>
-    <div id="log" class="muted" style="min-height:42px">جاهز.</div>
     <div class="row">
-      <div class="stat ownerP">أنت: <b id="pOwn">—</b> أقاليم</div>
-      <div class="stat ownerA">الخصم: <b id="aOwn">—</b></div>
-      <div class="stat ownerN">محايد: <b id="nOwn">—</b></div>
+      <div class="pill" style="background:#062532;border-color:#0c445a">أنت: <b id="pOwn">—</b></div>
+      <div class="pill" style="background:#2a0e16;border-color:#5a0c1d">الخصم: <b id="aOwn">—</b></div>
+      <div class="pill" style="background:#1f2937;border-color:#0f273f">محايد: <b id="nOwn">—</b></div>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  // ==== MAP DATA (24 إقليماً، اتصالات ثابتة) ====
-  const W=640,H=440;
-  const nodes=[
-    {x:90,y:90},{x:160,y:70},{x:230,y:90},{x:300,y:70},{x:370,y:90},{x:440,y:70},
-    {x:510,y:90},{x:560,y:120},{x:520,y:170},{x:450,y:170},{x:380,y:170},{x:310,y:170},
-    {x:240,y:170},{x:170,y:170},{x:100,y:170},{x:70,y:220},{x:140,y:230},{x:210,y:240},
-    {x:280,y:250},{x:350,y:240},{x:420,y:230},{x:490,y:240},{x:560,y:260},{x:300,y:320},
-  ];
-  const adj=[
-    [1,14],[0,2,13],[1,3,12],[2,4,11],[3,5,10],[4,6,9],[5,7],[6,8],[7,9,21],[5,8,10],
-    [4,9,11,20],[3,10,12,19],[2,11,13,18],[1,12,14,16],[0,13,15],[14,16],[13,15,17],[16,18],
-    [17,19,23],[11,18,20,23],[10,19,21],[8,20,22],[21],[18,19]
-  ];
+  // ===== ألوان الملكية =====
+  const COL_P='var(--p)', COL_A='var(--ai)', COL_N='var(--n)';
 
-  // owners: 0 player, 1 AI, 2 neutral
-  const OWN_COL={0:'#06b6d4',1:'#f43f5e',2:'#64748b'};
-  const OUTLINE='#0f273f';
+  // ===== بيانات الأقاليم (9) و الجوار (مشترِك حدود) =====
+  const regs=[...document.querySelectorAll('.reg')];
+  const lbls=[...document.querySelectorAll('#labels .lbl')]; // لترقيم القوات
+  const adj = {
+    0:[1,3], 1:[0,2,4], 2:[1,5],
+    3:[0,4,6],4:[1,3,5,7],5:[2,4,8],
+    6:[3,7], 7:[4,6,8], 8:[5,7]
+  };
 
-  const N=nodes.length;
-  let prov=Array.from({length:N}, (_,i)=>({
+  // owner: 0 player, 1 AI, 2 neutral
+  let prov = Array.from({length:9}, (_,i)=>({
     owner: i%3===0?0 : (i%3===1?1:2),
-    troops: 2 + (i%3===0 ? 2:0),
-    ind: (i%5===0)?2:1,
-    def: (i%4===0)?2:1,
-    pop: 3 + (i%6===0?2:0),
+    troops: 2 + (i%3===0?2:0),
+    ind: (i%4===0)?2:1,
+    def: (i%5===0)?2:1,
+    pop: 2 + (i%3===2?1:0)
   }));
 
-  // economy
-  let turn=1;
-  let moneyP=15, moneyA=15;
+  // اقتصاد
+  let goldP=14, goldA=14, turn=1;
 
-  // selection
-  let selFrom=null, selTo=null;
-
-  // canvas
-  const cv=document.getElementById('map');
-  const ctx=cv.getContext('2d');
+  // اختيار
+  let from=null, to=null;
 
   // UI refs
-  const info=document.getElementById('info');
-  const log=document.getElementById('log');
-  const turnPill=document.getElementById('turnPill');
-  const ownPill=document.getElementById('ownPill');
-  const moneyPill=document.getElementById('moneyPill');
-  const stTroops=document.getElementById('stTroops');
-  const stInd=document.getElementById('stInd');
-  const stDef=document.getElementById('stDef');
-  const stPop=document.getElementById('stPop');
-  const pOwn=document.getElementById('pOwn');
-  const aOwn=document.getElementById('aOwn');
-  const nOwn=document.getElementById('nOwn');
-  const btnTrain=document.getElementById('btnTrain');
-  const btnInvest=document.getElementById('btnInvest');
-  const btnAttack=document.getElementById('btnAttack');
-  const btnEnd=document.getElementById('btnEnd');
-  const btnNew=document.getElementById('btnNew');
+  const info=document.getElementById('info'), log=document.getElementById('log');
+  const turnPill=document.getElementById('turnPill'), ownPill=document.getElementById('ownPill'), goldPill=document.getElementById('goldPill');
+  const pOwn=document.getElementById('pOwn'), aOwn=document.getElementById('aOwn'), nOwn=document.getElementById('nOwn');
+  const stTroops=document.getElementById('stTroops'), stInd=document.getElementById('stInd'), stDef=document.getElementById('stDef'), stPop=document.getElementById('stPop');
+  const btnTrain=document.getElementById('btnTrain'), btnInvest=document.getElementById('btnInvest'), btnAttack=document.getElementById('btnAttack'), btnEnd=document.getElementById('btnEnd'), btnNew=document.getElementById('btnNew');
 
-  // ====== DRAW ======
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    // edges
-    ctx.lineWidth=2;
-    for(let i=0;i<N;i++){
-      for(const j of adj[i]) if(j>i){
-        ctx.strokeStyle='#1e293b';
-        ctx.beginPath();
-        ctx.moveTo(nodes[i].x,nodes[i].y);
-        ctx.lineTo(nodes[j].x,nodes[j].y);
-        ctx.stroke();
-      }
-    }
-    // nodes
-    for(let i=0;i<N;i++){
-      const p=prov[i]; const {x,y}=nodes[i];
-      const r=(selFrom===i||selTo===i)? 16:13;
-      // glow
-      ctx.fillStyle=OWN_COL[p.owner]+'33';
-      ctx.beginPath(); ctx.arc(x,y,r+6,0,Math.PI*2); ctx.fill();
-      // main
-      ctx.fillStyle=OWN_COL[p.owner];
-      ctx.strokeStyle=OUTLINE;
-      ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
-      // text
-      ctx.fillStyle='#e2e8f0';
-      ctx.font='bold 12px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(p.troops, x, y);
-    }
-    // arrows for selection
-    if(selFrom!=null && selTo!=null){
-      const a=nodes[selFrom], b=nodes[selTo];
-      drawArrow(a.x,a.y,b.x,b.y,'#fde68a');
-    }
-  }
-  function drawArrow(x1,y1,x2,y2, col){
-    const ang=Math.atan2(y2-y1,x2-x1);
-    ctx.strokeStyle=col; ctx.lineWidth=3;
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-    ctx.fillStyle=col;
-    const sz=8;
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - sz*Math.cos(ang-Math.PI/6), y2 - sz*Math.sin(ang-Math.PI/6));
-    ctx.lineTo(x2 - sz*Math.cos(ang+Math.PI/6), y2 - sz*Math.sin(ang+Math.PI/6));
-    ctx.closePath(); ctx.fill();
-  }
-
-  // ====== HELPERS ======
-  function inCircle(px,py,cx,cy,r){ const dx=px-cx, dy=py-cy; return dx*dx+dy*dy<=r*r; }
-  function neighbors(i){ return adj[i]; }
+  // ===== أدوات =====
   function counts(){
     let cP=0,cA=0,cN=0;
-    for(const p of prov){ if(p.owner===0) cP++; else if(p.owner===1) cA++; else cN++; }
+    for(const p of prov){ if(p.owner===0)cP++; else if(p.owner===1)cA++; else cN++; }
     return {cP,cA,cN};
   }
   function income(owner){
-    let sum=0;
-    for(const p of prov) if(p.owner===owner) sum += (p.ind + p.pop);
-    return sum;
+    let s=0; for(const p of prov) if(p.owner===owner) s += (p.ind + p.pop); return s;
   }
-  function refreshStats(){
+  function setFill(i){
+    regs[i].style.fill = prov[i].owner===0? getComputedStyle(document.documentElement).getPropertyValue('--p')
+      : prov[i].owner===1? getComputedStyle(document.documentElement).getPropertyValue('--ai')
+      : getComputedStyle(document.documentElement).getPropertyValue('--n');
+  }
+  function refresh(){
+    regs.forEach((r,i)=>{ setFill(i); r.classList.remove('sel'); lbls[i].textContent = prov[i].troops; });
+    if(from!=null) regs[from].classList.add('sel');
+    if(to!=null) regs[to].classList.add('sel');
     const {cP,cA,cN}=counts();
-    turnPill.textContent='الدور: '+turn;
-    ownPill.textContent='أقاليمك: '+cP;
-    moneyPill.textContent='الذهب: '+moneyP;
     pOwn.textContent=cP; aOwn.textContent=cA; nOwn.textContent=cN;
+    ownPill.textContent='أقاليمك: '+cP;
+    goldPill.textContent='الذهب: '+goldP;
+    turnPill.textContent='الدور: '+turn;
+    updateButtons();
+    showStats(from ?? to ?? 0);
   }
-  function showProv(i){
-    const p=prov[i];
-    stTroops.textContent=p.troops;
-    stInd.textContent=p.ind;
-    stDef.textContent=p.def;
-    stPop.textContent=p.pop;
+  function showStats(i){
+    const p=prov[i]||{troops:'—',ind:'—',def:'—',pop:'—'};
+    stTroops.textContent=p.troops; stInd.textContent=p.ind; stDef.textContent=p.def; stPop.textContent=p.pop;
   }
-  function setLog(s){ log.textContent=s; }
+  function updateButtons(){
+    btnTrain.disabled = !(from!=null && prov[from].owner===0 && goldP>=5);
+    btnInvest.disabled= !(from!=null && prov[from].owner===0 && goldP>=6);
+    btnAttack.disabled = !(from!=null && to!=null && prov[from].owner===0 && prov[to].owner!==0 && adj[from].includes(to) && prov[from].troops>=2);
+  }
+  function logMsg(s){ log.textContent=s; }
 
-  // ====== INPUT ======
-  cv.addEventListener('click', (e)=>{
-    const r=cv.getBoundingClientRect();
-    const x=(e.clientX-r.left)*cv.width/r.width;
-    const y=(e.clientY-r.top)*cv.height/r.height;
-    let hit=-1;
-    for(let i=0;i<N;i++){
-      if(inCircle(x,y,nodes[i].x,nodes[i].y,16)){ hit=i; break; }
-    }
-    if(hit<0) return;
-
-    if(selFrom==null){
-      if(prov[hit].owner!==0){ setLog('اختر إقليمًا تملكه.'); return; }
-      selFrom=hit; selTo=null; showProv(hit);
-      info.innerHTML='اختر جارًا للتركيز/الهجوم أو نفّذ تدريب/استثمار.';
-    }else if(selTo==null){
-      if(hit===selFrom){ selFrom=null; selTo=null; info.textContent='تم إلغاء التحديد.'; }
-      else if(neighbors(selFrom).includes(hit)){
-        selTo=hit; showProv(hit);
-        info.innerHTML = (prov[hit].owner===0)
-          ? 'جارٍ لك، مِلْكك. يمكنك تدريبه/الاستثمار فيه بعد تحديده كمصدر.'
-          : 'جارٍ عدو/محايد. اضغط "هجوم" لاستخدام نصف قوات المصدر.';
+  // ===== تفاعل الخريطة =====
+  regs.forEach((el,i)=>{
+    el.addEventListener('click', ()=>{
+      if(from==null){
+        if(prov[i].owner!==0){ logMsg('اختر إقليم تملكه.'); return; }
+        from=i; to=null; info.textContent='اختر جارًا للتركيز/الهجوم أو استخدم تدريب/استثمار.'; showStats(i);
+      }else if(to==null){
+        if(i===from){ from=null; to=null; info.textContent='تم إلغاء التحديد.'; }
+        else if(adj[from].includes(i)){ to=i; showStats(i); info.textContent = (prov[i].owner===0)? 'جارٍ تابع لك.' : 'جارٍ عدو/محايد — جاهز للهجوم.'; }
+        else { logMsg('هذا الإقليم ليس مجاورًا للمصدر.'); }
       }else{
-        setLog('هذا الإقليم ليس جارًا للمصدر المختار.');
+        // إذا كان already from & to، الضغط يغيّر المصدر لو ملكك
+        if(prov[i].owner===0){ from=i; to=null; showStats(i); }
+        else { to=i; showStats(i); }
       }
-    }else{
-      // لو كان عندنا from و to واخترت نقطة جديدة
-      selFrom= (prov[hit].owner===0)? hit : selFrom;
-      selTo=null; showProv(selFrom);
-    }
-    updateButtons(); draw();
+      refresh();
+    });
   });
 
-  function updateButtons(){
-    btnAttack.disabled = !(selFrom!=null && selTo!=null && prov[selFrom].owner===0 && prov[selTo].owner!==0 && neighbors(selFrom).includes(selTo) && prov[selFrom].troops>=2);
-    btnTrain.disabled = !(selFrom!=null && prov[selFrom].owner===0 && moneyP>=5);
-    btnInvest.disabled = !(selFrom!=null && prov[selFrom].owner===0 && moneyP>=6);
-  }
-
-  // ====== ACTIONS ======
+  // ===== أزرار الإجراءات =====
   btnTrain.onclick=()=>{
-    if(selFrom==null) return;
-    const p=prov[selFrom];
-    if(p.owner!==0 || moneyP<5) return;
-    moneyP-=5; p.troops += 2; setLog('تم تدريب +2 في الإقليم المحدد.');
-    showProv(selFrom); refreshStats(); updateButtons(); draw();
+    if(from==null) return;
+    const p=prov[from]; if(p.owner!==0||goldP<5) return;
+    p.troops+=2; goldP-=5; logMsg('تدريب +2 قوات.'); refresh();
   };
-
   btnInvest.onclick=()=>{
-    if(selFrom==null) return;
-    const p=prov[selFrom];
-    if(p.owner!==0 || moneyP<6) return;
-    moneyP-=6; p.ind += 1; setLog('استثمار +1 صناعة.');
-    showProv(selFrom); refreshStats(); updateButtons(); draw();
+    if(from==null) return;
+    const p=prov[from]; if(p.owner!==0||goldP<6) return;
+    p.ind+=1; goldP-=6; logMsg('استثمار +1 صناعة.'); refresh();
   };
-
   btnAttack.onclick=()=>{
-    if(!(selFrom!=null && selTo!=null)) return;
-    const a=prov[selFrom], d=prov[selTo];
-    if(a.owner!==0 || d.owner===0) return;
-    if(!neighbors(selFrom).includes(selTo)) return;
-    // نصف القوات يهاجم
-    const send = Math.max(1, Math.floor(a.troops/2));
-    a.troops -= send;
-
-    const atk = send * (1 + 0.15*a.ind) * (0.85 + Math.random()*0.3);
-    const def = d.troops * (1 + 0.15*d.def) * (0.85 + Math.random()*0.3);
-
+    if(!(from!=null&&to!=null)) return;
+    const A=prov[from], D=prov[to];
+    if(A.owner!==0||D.owner===0||!adj[from].includes(to)) return;
+    const send=Math.max(1, Math.floor(A.troops/2));
+    A.troops-=send;
+    const atk = send*(1+0.15*A.ind)*(0.85+Math.random()*0.3);
+    const def = D.troops*(1+0.15*D.def)*(0.85+Math.random()*0.3);
     if(atk>def){
-      // فوز
-      const remain = Math.max(1, Math.floor(send - def/(1+0.15*a.ind)));
-      d.owner=0; d.troops=remain; // استحواذ
-      setLog('✅ انتصرت! تمت السيطرة على الإقليم.');
+      const remain=Math.max(1, Math.floor(send - def/(1+0.15*A.ind)));
+      D.owner=0; D.troops=remain; logMsg('✅ انتصرت وسيطرت على الإقليم.');
     }else{
-      // خسارة: المدافع يخسر شوية
-      const loss = Math.max(1, Math.floor(atk/(1+0.15*d.def)));
-      d.troops = Math.max(0, d.troops - loss);
-      setLog('❌ الهجوم فشل. المدافع خسر بعض القوات.');
+      const loss=Math.max(1, Math.floor(atk/(1+0.15*D.def)));
+      D.troops=Math.max(0, D.troops - loss); logMsg('❌ الهجوم فشل جزئيًا.');
     }
-    // فحص الفوز
-    checkWin();
-    showProv(selTo); refreshStats(); updateButtons(); draw();
+    checkWin(); refresh();
   };
 
   btnEnd.onclick=()=>{
-    // دخل الذهب
-    moneyP += income(0);
-    // نمو بسيط للقوات (صيانة)
-    for(const p of prov) if(p.owner===0) p.troops += (Math.random()<0.25?1:0);
+    // دخلك
+    goldP += income(0);
+    for(const p of prov) if(p.owner===0 && Math.random()<0.25) p.troops++;
 
-    // دور الخصم (AI)
+    // دور الخصم
     aiTurn();
 
-    turn++; refreshStats(); updateButtons(); draw();
-    setLog('بدأ دور جديد.');
+    turn++; logMsg('بدأ دور جديد.'); refresh();
   };
 
   btnNew.onclick=()=>{ newGame(); };
 
+  // ===== فوز/خسارة =====
   function checkWin(){
     const {cP,cA}=counts();
-    if(cP >= Math.ceil(N*0.6)) { setLog('🏆 فوز! سيطرت على أغلب الأقاليم. اضغط بداية جديدة.'); freeze(); }
-    if(cA >= Math.ceil(N*0.6)) { setLog('💀 خسرت. الخصم تمدد. اضغط بداية جديدة.'); freeze(); }
+    if(cP>=6){ logMsg('🏆 فوز — سيطرت على أغلب الأقاليم!'); disableAll(); }
+    if(cA>=6){ logMsg('💀 خسارة — الخصم تمدد!'); disableAll(); }
   }
-  let frozen=false;
-  function freeze(){ frozen=true; btnAttack.disabled=btnEnd.disabled=btnTrain.disabled=btnInvest.disabled=true; }
-  function unfreeze(){ frozen=false; }
+  function disableAll(){
+    btnTrain.disabled=btnInvest.disabled=btnAttack.disabled=btnEnd.disabled=true;
+    regs.forEach(r=>r.style.pointerEvents='none');
+  }
 
-  // ====== AI ======
+  // ===== ذكاء الخصم بسيط =====
   function aiTurn(){
-    if(frozen) return;
-    // AI اقتصاد
-    moneyA += income(1);
-
-    // 1) لو فيه حدود ضدك، هاجم هدفًا ضعيفًا
-    const fronts=[];
-    for(let i=0;i<N;i++) if(prov[i].owner===1){
-      for(const j of adj[i]){
-        if(prov[j].owner!==1){ fronts.push({from:i,to:j}); }
+    goldA += income(1);
+    // يحاول يهاجم أضعف جار
+    let moves=[];
+    for(let i=0;i<9;i++) if(prov[i].owner===1){
+      for(const j of adj[i]) if(prov[j].owner!==1){
+        moves.push({from:i,to:j});
       }
     }
-    // رتب الأهداف حسب ضعف المدافع
-    fronts.sort((A,B)=> prov[A.to].troops - prov[B.to].troops);
-
+    moves.sort((A,B)=> prov[A.to].troops - prov[B.to].troops);
     let acted=false;
-    for(const f of fronts){
-      const a=prov[f.from], d=prov[f.to];
-      if(a.troops>=3 && Math.random()<0.8){ // يميل للهجوم
+    for(const m of moves){
+      const a=prov[m.from], d=prov[m.to];
+      if(a.troops>=3 && Math.random()<0.8){
         const send=Math.max(1, Math.floor(a.troops/2));
         a.troops-=send;
         const atk = send*(1+0.15*a.ind)*(0.85+Math.random()*0.3);
         const def = d.troops*(1+0.15*d.def)*(0.85+Math.random()*0.3);
         if(atk>def){
           const remain=Math.max(1, Math.floor(send - def/(1+0.15*a.ind)));
-          d.owner=1; d.troops=remain;
-          setLog('⚠️ الخصم سيطر على إقليم.');
+          d.owner=1; d.troops=remain; logMsg('⚠️ الخصم سيطر على إقليم.');
         }else{
-          const loss = Math.max(1, Math.floor(atk/(1+0.15*d.def)));
-          d.troops = Math.max(0, d.troops - loss);
-          setLog('الخصم هاجم وفشل جزئيًا.');
+          const loss=Math.max(1, Math.floor(atk/(1+0.15*d.def)));
+          d.troops=Math.max(0, d.troops - loss); logMsg('الخصم هاجم وفشل جزئيًا.');
         }
         acted=true; break;
       }
     }
-
     if(!acted){
-      // 2) لو ماهاجمش: استثمار أو تدريب
-      const aiProvIdx = prov.map((p,i)=>({p,i})).filter(x=>x.p.owner===1).map(x=>x.i);
-      if(aiProvIdx.length){
-        const k = aiProvIdx[Math.floor(Math.random()*aiProvIdx.length)];
-        const p = prov[k];
-        if(moneyA>=6 && Math.random()<0.5){ p.ind++; moneyA-=6; }
-        else if(moneyA>=5){ p.troops+=2; moneyA-=5; }
-        else { p.troops += (Math.random()<0.3?1:0); }
+      // استثمار/تدريب
+      const aiIdx = prov.map((p,i)=>[p,i]).filter(x=>x[0].owner===1).map(x=>x[1]);
+      if(aiIdx.length){
+        const k=aiIdx[Math.floor(Math.random()*aiIdx.length)];
+        const p=prov[k];
+        if(goldA>=6 && Math.random()<0.5){ p.ind++; goldA-=6; }
+        else if(goldA>=5){ p.troops+=2; goldA-=5; }
+        else if(Math.random()<0.3){ p.troops++; }
       }
     }
-    // صيانة بسيطة
-    for(const p of prov) if(p.owner===1) p.troops += (Math.random()<0.2?1:0);
-
     checkWin();
   }
 
-  // ====== NEW GAME ======
+  // ===== لعبة جديدة =====
   function newGame(){
-    prov=prov.map((p,i)=>({
+    prov = Array.from({length:9}, (_,i)=>({
       owner: i%3===0?0 : (i%3===1?1:2),
-      troops: 2 + (i%3===0 ? 2:0),
-      ind: (i%5===0)?2:1,
-      def: (i%4===0)?2:1,
-      pop: 3 + (i%6===0?2:0),
+      troops: 2 + (i%3===0?2:0),
+      ind: (i%4===0)?2:1,
+      def: (i%5===0)?2:1,
+      pop: 2 + (i%3===2?1:0)
     }));
-    selFrom=selTo=null;
-    moneyP=15; moneyA=15; turn=1; unfreeze();
-    setLog('بداية جديدة.');
-    refreshStats(); updateButtons(); draw();
+    regs.forEach(r=>r.style.pointerEvents='auto');
+    goldP=14; goldA=14; turn=1; from=null; to=null;
+    logMsg('بداية جديدة.'); refresh();
   }
 
-  // init
-  refreshStats(); updateButtons(); draw(); setLog('جاهز. اختر إقليمك ثم اختر جارًا للهجوم أو نفّذ تدريب/استثمار.');
+  // ===== بدء =====
+  refresh(); logMsg('جاهز: اختر إقليمك ثم جارًا للهجوم أو استخدم تدريب/استثمار.');
 })();
 </script>
 </body>
-      </html>
+</html>
