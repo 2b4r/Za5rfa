@@ -3,271 +3,304 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Agar‑Lite (Bots)</title>
+<title>المزخرف — مولد نصوص مزخرفة</title>
+<meta name="description" content="المزخرف: اكتب نصك واحصل على عشرات الأشكال والخطوط المزخرفة القابلة للنسخ فورًا." />
 <style>
-  :root{--bg:#0b1220;--panel:#0e1626;--muted:#9fb3c8;--border:#1f2b46;}
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:var(--bg);color:#e5f0ff;font:14px/1.5 system-ui,Segoe UI,Arial;overflow:hidden}
-  canvas{display:block;width:100vw;height:100vh}
-  .hud{position:fixed;top:8px;left:8px;display:flex;gap:8px;align-items:center;z-index:3}
-  .pill{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:#cfe6ff}
-  .side{position:fixed;top:8px;right:8px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:8px 10px;z-index:3;max-width:240px}
-  .muted{color:var(--muted)} .list{max-height:38vh;overflow:auto;font-size:12px}
-  /* عصاية افتراضية */
-  .stick{position:fixed;bottom:18px;left:18px;width:120px;height:120px;border-radius:50%;border:1px solid #29476f;background:#0c182b9a;z-index:4}
-  .stick .dot{position:absolute;left:50%;top:50%;width:46px;height:46px;border-radius:50%;transform:translate(-50%,-50%);background:#06b6d4aa}
+  :root{
+    --bg:#0f172a; --panel:#0b1220; --muted:#94a3b8; --border:#1f2937; --accent:#06b6d4; --txt:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Arial}
+  header{position:sticky;top:0;background:#0f172acc;backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:5}
+  .wrap{max-width:1100px;margin:0 auto;padding:14px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .brand{display:flex;gap:8px;align-items:center;font-weight:800}
+  .brand .logo{filter:drop-shadow(0 0 12px #00e5ff77)}
+  .muted{color:var(--muted)}
+  main .grid{display:grid;grid-template-columns:1fr;gap:14px;padding:14px}
+  @media(min-width:950px){ main .grid{grid-template-columns: 1fr 1fr} }
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px}
+  textarea,.input{width:100%;background:#0b1628;color:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none}
+  .btn{border:1px solid var(--border);background:#142033;color:#d9f6ff;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .btn:hover{filter:brightness(1.08)} .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .accent{background:rgba(6,182,212,.2)}
+  .list{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto;padding-right:2px}
+  .item{border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1322}
+  .item .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .item .name{font-weight:700;color:#aeeaff}
+  .out{white-space:pre-wrap;direction:auto;margin-top:6px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{background:#0e1a2d;border:1px solid #22324a;border-radius:999px;padding:4px 10px;color:#b9d7f2;font-size:12px}
+  .tip{font-size:12px;color:#9fb3c8}
 </style>
 </head>
 <body>
-<canvas id="cv"></canvas>
+<header>
+  <div class="wrap row" style="justify-content:space-between">
+    <div class="brand"><span class="logo">✨</span> <span>المزخرف</span></div>
+    <div class="row">
+      <span class="pill">يدعم النسخ الفوري</span>
+      <span class="pill">متوافق مع الموبايل</span>
+    </div>
+  </div>
+</header>
 
-<div class="hud">
-  <span id="fps" class="pill">— FPS</span>
-  <span id="you" class="pill">أنا: 0</span>
-  <span id="bots" class="pill">Bots: —</span>
-</div>
-<div class="side">
-  <div class="muted" style="margin-bottom:6px">التحكم: الأسهم/WASD أو المسّ</div>
-  <div class="list" id="scores"></div>
-</div>
-<div class="stick" id="stick"><div class="dot" id="dot"></div></div>
+<main class="wrap">
+  <section class="card">
+    <label class="muted" for="src">اكتب النص هنا:</label>
+    <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
+    <div class="row" style="margin-top:8px">
+      <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر...)" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
+      <button id="btnClear"   class="btn">مسح</button>
+      <span class="tip">💡 أفضل الزخارف للاتيني؛ للعربي جرّب “تطويل” و”تشكيل خفيف”.</span>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
+      <label class="pill"><input id="optTashkeel" type="checkbox" /> تشكيل خفيف</label>
+      <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
+      <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div class="muted">الأنماط المتاحة</div>
+      <span id="count" class="pill">— نتيجة</span>
+    </div>
+    <div id="list" class="list" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:6px 0">ملاحظات سريعة</h3>
+    <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.7">
+      <li>بعض الأجهزة قد لا تدعم كل الحروف المظللة (𝔣𝔯𝔞𝔨𝔱𝔲𝔯، 𝓼𝓬𝓻𝓲𝓹𝓽…). لو شكل غريب ظهر، جرّب نمطًا آخر.</li>
+      <li>للعربي: “تطويل” يضيف ـ بين الحروف المناسبة، و“تشكيل خفيف” يضيف حركات متفرقة بدون مبالغة.</li>
+      <li>كل النتائج **نص قابل للنسخ**، مش صور.</li>
+    </ul>
+  </section>
+</main>
 
 <script>
-/* ---- الإعدادات العامة ---- */
-const WORLD = { w: 2600, h: 2600 };
-const PELLETS_TARGET = 320;   // عدد الأكل في العالم
-const CAPTURE_RATIO = 1.15;   // لازم تكون أكبر من الخصم بنسبة 15% على الأقل لابتلاعه
-const PHYS_HZ = 60;
+/* ========= Helpers ========= */
+const $ = sel => document.querySelector(sel);
+const src = $('#src'), list = $('#list'), countEl = $('#count'), filterEl = $('#filter');
+const optK = $('#optKashida'), optT = $('#optTashkeel'), optD1 = $('#optDecor1'), optD2 = $('#optDecor2');
 
-/* ---- الرسم وتهيئة الشاشة ---- */
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-function resize(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio; }
-addEventListener('resize', resize, {passive:true}); resize();
+const AR_LET = /[\u0621-\u064A]/;
+function isArabic(ch){ return AR_LET.test(ch); }
 
-/* ---- عناصر اللعبة ---- */
-function rnd(a,b){ return a + Math.random()*(b-a); }
-function hsl(h){ return `hsl(${h},80%,55%)`; }
-
-function makePlayer(name, color, x, y){
-  return {name, color, x, y, r: 28, vx:0, vy:0, dx:0, dy:0, score:0, ai:null};
+/* ========= Unicode Maps (Latin) ========= */
+const base = {
+  u: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  l: 'abcdefghijklmnopqrstuvwxyz',
+  d: '0123456789'
+};
+function mapByOffset(txt, offU, offL, offD){
+  let out = '';
+  for (const ch of txt){
+    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch), id = base.d.indexOf(ch);
+    if (iu>-1 && offU!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x41 + offU);
+    else if (il>-1 && offL!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x61 + offL);
+    else if (id>-1 && offD!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x30 + offD);
+    else out += ch;
+  }
+  return out;
 }
-const you = makePlayer('أنت', '#00c2d6', rnd(400,WORLD.w-400), rnd(400,WORLD.h-400));
-const entities = [you]; // أول عنصر هو اللاعب
-const pellets = [];
 
-/* ---- توليد بوتات بمستويات ----
-   نوع timid: يهرب من الأكبر/نادراً يطارد، يبحث أكل.
-   نوع normal: متوازن.
-   نوع aggressive: يطارد الأصغر بقوة ويجازف.
-*/
-const BOT_TYPES = [
-  {name:'timid',  hue:200, speedK:1.05,  bravery:0.2,  caution:1.2},
-  {name:'normal', hue:120, speedK:1.00,  bravery:0.6,  caution:1.0},
-  {name:'agro',   hue:350, speedK:1.10,  bravery:0.95, caution:0.8},
+// Special maps (script/fraktur exceptions, circled, small, upside)
+const OV_FRK = { 'C':'\u212D','H':'\u210C','I':'\u2111','R':'\u211C','Z':'\u2128' };
+const OV_SCR = { 'B':'\u212C','E':'\u2130','F':'\u2131','H':'\u210B','I':'\u2110','L':'\u2112','M':'\u2133','R':'\u211B' };
+
+function mapScript(txt){
+  let out='';
+  for (const ch of txt){
+    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
+    if (iu>-1){
+      out += OV_SCR[ch] || String.fromCodePoint(0x1D49C + iu);
+    } else if (il>-1){
+      out += String.fromCodePoint(0x1D4B6 + il);
+    } else out += ch;
+  }
+  return out;
+}
+function mapFraktur(txt){
+  let out='';
+  for (const ch of txt){
+    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
+    if (iu>-1){
+      out += OV_FRK[ch] || String.fromCodePoint(0x1D504 + iu);
+    } else if (il>-1){
+      out += String.fromCodePoint(0x1D51E + il);
+    } else out += ch;
+  }
+  return out;
+}
+function mapCircled(txt){
+  let out='';
+  for (const ch of txt){
+    const iu=base.u.indexOf(ch), il=base.l.indexOf(ch), id=base.d.indexOf(ch);
+    if (iu>-1) out += String.fromCodePoint(0x24B6 + iu);
+    else if (il>-1) out += String.fromCodePoint(0x24D0 + il);
+    else if (id>-1){
+      if (ch==='0') out += '\u24EA';
+      else out += String.fromCodePoint(0x2460 + (id-1));
+    } else out += ch;
+  }
+  return out;
+}
+
+// Tiny superscripts (approx)
+const SUP = {
+  a:'ᵃ',b:'ᵇ',c:'ᶜ',d:'ᵈ',e:'ᵉ',f:'ᶠ',g:'ᵍ',h:'ʰ',i:'ᶦ',j:'ʲ',k:'ᵏ',l:'ˡ',m:'ᵐ',n:'ⁿ',o:'ᵒ',p:'ᵖ',q:'ᑫ',r:'ʳ',s:'ˢ',t:'ᵗ',u:'ᵘ',v:'ᵛ',w:'ʷ',x:'ˣ',y:'ʸ',z:'ᶻ',
+  A:'ᴬ',B:'ᴮ',D:'ᴰ',E:'ᴱ',G:'ᴳ',H:'ᴴ',I:'ᴵ',J:'ᴶ',K:'ᴷ',L:'ᴸ',M:'ᴹ',N:'ᴺ',O:'ᴼ',P:'ᴾ',R:'ᴿ',T:'ᵀ',U:'ᵁ',V:'ⱽ',W:'ᵂ',
+  '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'
+};
+function mapSup(txt){ return [...txt].map(ch=>SUP[ch]||ch).join(''); }
+
+// Small-caps (approx using Unicode)
+const SC = {'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
+function mapSmallCaps(txt){ return [...txt].map(ch=>SC[ch]||SC[ch?.toLowerCase()]||ch).join(''); }
+
+// Upside-down
+const UP = {'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'ן','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z',
+'A':'∀','B':'ꓭ','C':'Ɔ','D':'◖','E':'Ǝ','F':'Ⅎ','G':'⅁','H':'H','I':'I','J':'ſ','K':'ʞ','L':'˥','M':'W','N':'N','O':'O','P':'Ԁ','Q':'Ό','R':'ᴚ','S':'S','T':'⊥','U':'∩','V':'Λ','W':'M','X':'X','Y':'⅄','Z':'Z',
+'0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6'};
+function mapUpside(txt){
+  return [...txt].reverse().map(ch=>UP[ch]||ch).join('');
+}
+
+/* ========= Arabic helpers ========= */
+function applyKashida(s){
+  // أضف ـ بين الحروف العربية المتجاورة فقط
+  const chars = [...s];
+  let out = '';
+  for (let i=0;i<chars.length;i++){
+    out += chars[i];
+    if ( AR_LET.test(chars[i]) && AR_LET.test(chars[i+1]||'') ) out += '\u0640'; // ـ
+  }
+  return out;
+}
+function applyTashkeelLight(s){
+  const diacs = ['\u064E','\u064F','\u0650','\u0652']; // فتحة، ضمة، كسرة، سكون
+  let out='', n=0;
+  for (const ch of s){
+    out += ch;
+    if (AR_LET.test(ch) && (++n%2===0)) out += diacs[n%diacs.length];
+  }
+  return out;
+}
+function decorate(s,mode){
+  if(!s.trim()) return s;
+  if(mode===1) return `•✧ ${s} ✧•`;
+  if(mode===2) return `⌯⟡ ${s} ⟡⌯`;
+  return s;
+}
+
+/* ========= Styles ========= */
+const STYLES = [
+  {id:'plain',    name:'عادي (بدون تغيير)', fn:(t)=>t},
+  {id:'bold',     name:'سميك Bold',          fn:(t)=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE)},
+  {id:'italic',   name:'مائل Italic',        fn:(t)=>mapByOffset(t,0x1D434,0x1D44E,null)},
+  {id:'boldit',   name:'سميك مائل',          fn:(t)=>mapByOffset(t,0x1D468,0x1D482,null)},
+  {id:'sansb',    name:'Sans عريض',          fn:(t)=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC)},
+  {id:'mono',     name:'Monospace',          fn:(t)=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6)},
+  {id:'script',   name:'Script مزخرف',       fn:mapScript},
+  {id:'frak',     name:'Fraktur',            fn:mapFraktur},
+  {id:'ds',       name:'Double‑Struck',      fn:(t)=>mapByOffset(t,0x1D538,0x1D552,0x1D7D8)},
+  {id:'circ',     name:'حروف داخل دوائر',    fn:mapCircled},
+  {id:'sup',      name:'حجم صغير (Superscript)', fn:mapSup},
+  {id:'sc',       name:'Small‑Caps (تقريبي)', fn:mapSmallCaps},
+  {id:'flip',     name:'مقلوب (Upside‑Down)', fn:mapUpside},
+  // Arabic-oriented
+  {id:'kashida',  name:'عربي — تطويل (ـ)',  fn:applyKashida},
+  {id:'tashkeel', name:'عربي — تشكيل خفيف',  fn:applyTashkeelLight},
 ];
-function spawnBot(i){
-  const t = BOT_TYPES[i % BOT_TYPES.length];
-  const b = makePlayer(`${t.name}#${Math.floor(Math.random()*99)}`, hsl(t.hue), rnd(200,WORLD.w-200), rnd(200,WORLD.h-200));
-  b.ai = {type:t, target:null, jitter:rnd(0,Math.PI*2)};
-  entities.push(b);
-}
-for(let i=0;i<8;i++) spawnBot(i); // 8 بوتات
-document.getElementById('bots').textContent = 'Bots: '+(entities.length-1);
 
-function spawnPellets(){
-  while(pellets.length < PELLETS_TARGET){
-    pellets.push({x:rnd(60,WORLD.w-60), y:rnd(60,WORLD.h-60), r:4});
+/* ========= Render ========= */
+function genAll(){
+  const raw = src.value || '';
+  const mods = {
+    k: optK.checked,
+    t: optT.checked,
+    d1: optD1.checked,
+    d2: optD2.checked,
+  };
+  const q = (filterEl.value||'').trim().toLowerCase();
+  const results = [];
+
+  for (const st of STYLES){
+    if (q && !(`${st.id} ${st.name}`.toLowerCase().includes(q))) continue;
+    let out = st.fn(raw);
+    // optional decorations for Arabic/any
+    if (mods.k && st.id!=='kashida') out = applyKashida(out);
+    if (mods.t && st.id!=='tashkeel') out = applyTashkeelLight(out);
+    if (mods.d1) out = decorate(out,1);
+    if (mods.d2) out = decorate(out,2);
+
+    results.push({id:st.id, name:st.name, text:out});
+  }
+
+  list.innerHTML = results.map(r=>`
+    <div class="item">
+      <div class="head">
+        <div class="name">${r.name}</div>
+        <div class="tools">
+          <button class="btn" data-copy="${escapeHtml(r.text)}">نسخ</button>
+        </div>
+      </div>
+      <div class="out">${escapeHtml(r.text) || '<span class="muted">—</span>'}</div>
+    </div>
+  `).join('');
+
+  // bind copy
+  list.querySelectorAll('[data-copy]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const txt = btn.getAttribute('data-copy');
+      copyText(decodeHtml(txt));
+      btn.textContent='✓ تم النسخ'; setTimeout(()=>btn.textContent='نسخ',900);
+    });
+  });
+
+  countEl.textContent = results.length + ' نتيجة';
+}
+function copyText(s){
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(s);
+  else {
+    const t=document.createElement('textarea'); t.value=s; document.body.appendChild(t);
+    t.select(); document.execCommand('copy'); t.remove();
   }
 }
-spawnPellets();
+function escapeHtml(s){ return s.replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+function decodeHtml(s){ return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'); }
 
-/* ---- مدخلات: كيبورد + عصاية لمس ---- */
-const input = {dx:0,dy:0};
-addEventListener('keydown', e=>{
-  if(['ArrowUp','w','W'].includes(e.key)) input.dy=-1;
-  if(['ArrowDown','s','S'].includes(e.key)) input.dy= 1;
-  if(['ArrowLeft','a','A'].includes(e.key)) input.dx=-1;
-  if(['ArrowRight','d','D'].includes(e.key)) input.dx= 1;
+/* ========= Events ========= */
+['input','change'].forEach(ev=>{
+  src.addEventListener(ev, genAll);
+  filterEl.addEventListener(ev, genAll);
+  optK.addEventListener(ev, genAll);
+  optT.addEventListener(ev, genAll);
+  optD1.addEventListener(ev, genAll);
+  optD2.addEventListener(ev, genAll);
 });
-addEventListener('keyup', e=>{
-  if(['ArrowUp','w','W','ArrowDown','s','S'].includes(e.key)) input.dy=0;
-  if(['ArrowLeft','a','A','ArrowRight','d','D'].includes(e.key)) input.dx=0;
-});
-const stick = document.getElementById('stick'), dot = document.getElementById('dot');
-let dragging=false, center={x:0,y:0};
-function startStick(e){ dragging=true; const t=e.touches?e.touches[0]:e; center={x:t.clientX,y:t.clientY}; stick.style.left=(center.x-60)+'px'; stick.style.top=(center.y-60)+'px'; moveStick(e); }
-function moveStick(e){ if(!dragging) return; const t=e.touches?e.touches[0]:e; const dx=t.clientX-center.x, dy=t.clientY-center.y; const L=Math.hypot(dx,dy)||1; const max=44; const nx = Math.max(-1,Math.min(1,dx/L)), ny = Math.max(-1,Math.min(1,dy/L)); input.dx=nx; input.dy=ny; dot.style.transform=`translate(${nx*max}px,${ny*max}px)`; }
-function endStick(){ dragging=false; input.dx=input.dy=0; dot.style.transform='translate(-50%,-50%)'; }
-addEventListener('pointerdown', startStick); addEventListener('pointermove', moveStick); addEventListener('pointerup', endStick);
-addEventListener('touchstart', startStick, {passive:false}); addEventListener('touchmove', moveStick, {passive:false}); addEventListener('touchend', endStick, {passive:false});
 
-/* ---- فيزياء وحركة ---- */
-function moveEntity(p, dt){
-  // السرعة تقل مع الحجم
-  const base = 280; // px/s
-  const spd = (base / Math.sqrt(p.r)) * (p.ai ? p.ai.type.speedK : 1);
-  const len = Math.hypot(p.dx, p.dy) || 1;
-  p.vx = (p.dx/len) * spd;
-  p.vy = (p.dy/len) * spd;
-  p.x = Math.max(0, Math.min(WORLD.w, p.x + p.vx*dt));
-  p.y = Math.max(0, Math.min(WORLD.h, p.y + p.vy*dt));
-}
+document.getElementById('btnCopyAll').onclick = ()=>{
+  const texts=[...list.querySelectorAll('.out')].map(d=>d.textContent).join('\n');
+  copyText(texts); alert('تم نسخ كل النتائج.');
+};
+document.getElementById('btnClear').onclick = ()=>{
+  src.value=''; genAll();
+};
 
-function eatPellets(p){
-  for(let i=pellets.length-1;i>=0;i--){
-    const f=pellets[i];
-    if(Math.hypot(p.x-f.x,p.y-f.y) < p.r){
-      pellets.splice(i,1);
-      // زيادة المساحة = تكبير نصف القطر
-      const area = Math.PI*p.r*p.r + Math.PI*f.r*f.r*0.8;
-      p.r = Math.sqrt(area/Math.PI);
-      p.score += 1;
-    }
-  }
-}
+// Load sample + autosave
+const KEY='mazakhref_input_v1';
+src.value = localStorage.getItem(KEY) || '';
+src.addEventListener('input', ()=>localStorage.setItem(KEY, src.value));
 
-function mergePlayers(A,B){
-  const big = A.r>B.r ? A : B, small = A.r>B.r ? B : A;
-  if(big.r < small.r*CAPTURE_RATIO) return false;
-  if(Math.hypot(A.x-B.x, A.y-B.y) < Math.max(A.r,B.r)*0.85){
-    // دمج
-    const area = Math.PI*big.r*big.r + Math.PI*small.r*small.r*0.9;
-    big.r = Math.sqrt(area/Math.PI);
-    big.score += Math.max(1, Math.floor(small.r/2));
-    // إعادة إحياء الصغير
-    small.x=rnd(200,WORLD.w-200); small.y=rnd(200,WORLD.h-200);
-    small.r=26; small.score=0;
-    return true;
-  }
-  return false;
-}
-
-/* ---- ذكاء البوتات ---- */
-function botThink(b){
-  const t = b.ai.type;
-  // أقرب تهديد (أكبر منك قريب)
-  let threat=null, threatD=1e9;
-  for(const o of entities){
-    if(o===b) continue;
-    if(o.r > b.r*1.08){ // أكبر شوية
-      const d=Math.hypot(o.x-b.x,o.y-b.y);
-      if(d<threatD){ threat=o; threatD=d; }
-    }
-  }
-  // أقرب فريسة (أصغر منك بفرق جيد)
-  let prey=null, preyD=1e9;
-  for(const o of entities){
-    if(o===b) continue;
-    if(b.r > o.r*1.2){ // أنا أكبر بوضوح
-      const d=Math.hypot(o.x-b.x,o.y-b.y);
-      if(d<preyD){ prey=o; preyD=d; }
-    }
-  }
-  // أقرب أكل
-  let food=null, foodD=1e9;
-  for(let i=0;i<pellets.length;i++){
-    const f=pellets[i]; const d=Math.hypot(f.x-b.x,f.y-b.y);
-    if(d<foodD){ food=f; foodD=d; }
-  }
-
-  // القرار:
-  const fleeBias = t.caution * 1.0;
-  const chaseBias= t.bravery * 1.0;
-
-  let tx=b.x, ty=b.y; // هدف الحركة
-  if(threat && threatD < 400*fleeBias){ // اهرب
-    const dx = b.x - threat.x, dy = b.y - threat.y;
-    const L=Math.hypot(dx,dy)||1; tx=b.x + (dx/L)*200; ty=b.y + (dy/L)*200;
-  } else if(prey && Math.random()<chaseBias){ // اطارد
-    tx = prey.x; ty = prey.y;
-  } else if(food){ // روح للأكل
-    tx = food.x; ty = food.y;
-  }
-
-  // ضف شوية عشوائية رايقة
-  b.ai.jitter += 0.02;
-  tx += Math.cos(b.ai.jitter)*10; ty += Math.sin(b.ai.jitter)*10;
-
-  const dx=tx-b.x, dy=ty-b.y, L=Math.hypot(dx,dy)||1;
-  b.dx = dx/L; b.dy = dy/L;
-}
-
-/* ---- حلقة التحديث ---- */
-let acc=0, last=performance.now(), frames=0, fpst=0, lastFPS=performance.now();
-function frame(ts){
-  // FPS
-  frames++; if(ts-lastFPS>1000){ fpst=frames; frames=0; lastFPS=ts; document.getElementById('fps').textContent=fpst+' FPS'; }
-
-  // dt ثابت للفيزياء
-  const dt = (ts-last)/1000; last=ts; acc += dt;
-  const step = 1/PHYS_HZ;
-  while(acc>=step){
-    // مدخلات اللاعب
-    you.dx = input.dx; you.dy = input.dy;
-    // AI bots
-    for(let i=1;i<entities.length;i++) botThink(entities[i]);
-    // حركة الجميع
-    for(const p of entities){ moveEntity(p, step); eatPellets(p); }
-    // دمج/ابتلاع
-    for(let i=0;i<entities.length;i++){
-      for(let j=i+1;j<entities.length;j++){
-        mergePlayers(entities[i], entities[j]);
-      }
-    }
-    spawnPellets();
-    acc -= step;
-  }
-  draw();
-  requestAnimationFrame(frame);
-}
-requestAnimationFrame(frame);
-
-/* ---- الرسم ---- */
-function draw(){
-  const dpr = devicePixelRatio||1;
-  // كاميرا تتبع اللاعب
-  const zoomTarget = Math.max(0.5, Math.min(1.25, 90/Math.sqrt(you.r)));
-  draw.camZ = draw.camZ ?? zoomTarget;
-  draw.camZ += (zoomTarget - draw.camZ)*0.08;
-
-  const camX = you.x, camY = you.y, Z = draw.camZ*dpr;
-
-  ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.save();
-  ctx.translate(cv.width/2, cv.height/2);
-  ctx.scale(Z, Z);
-  ctx.translate(-camX, -camY);
-
-  // خلفية شبكية خفيفة
-  ctx.strokeStyle = '#0d1b2a';
-  ctx.lineWidth = 1;
-  for(let x=0;x<=WORLD.w;x+=120){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WORLD.h); ctx.stroke(); }
-  for(let y=0;y<=WORLD.h;y+=120){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(WORLD.w,y); ctx.stroke(); }
-
-  // الأكل
-  ctx.fillStyle = '#ffd166';
-  for(const f of pellets){ ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.fill(); }
-
-  // اللاعبين (بوتات + أنت)
-  for(const p of entities){
-    ctx.save();
-    ctx.shadowColor = p.color+'66'; ctx.shadowBlur = 12;
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-    ctx.shadowBlur=0;
-    // الاسم
-    ctx.fillStyle='#eaf2ff'; ctx.font='bold 14px system-ui'; ctx.textAlign='center';
-    ctx.fillText(p.name, p.x, p.y - p.r - 12);
-    ctx.restore();
-  }
-  ctx.restore();
-
-  // HUD
-  document.getElementById('you').textContent = 'أنا: '+Math.floor(you.r);
-  // scoreboard
-  const sorted=[...entities].sort((a,b)=>b.r-a.r).slice(0,10);
-  document.getElementById('scores').innerHTML = sorted.map((p,i)=>`<div>${i+1}. ${p===you?'👤 ':''}${p.name} — <b>${Math.floor(p.r)}</b></div>`).join('');
-}
+// initial
+genAll();
 </script>
 </body>
 </html>
