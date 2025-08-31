@@ -1,73 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>المزخرف — مولّد نصوص مزخرفة</title>
-  <meta name="description" content="المزخرف: اكتب نصك واحصل على عشرات الأشكال المزخرفة القابلة للنسخ فورًا." />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <div class="wrap row" style="justify-content:space-between">
-      <div class="brand"><span class="logo">✨</span><span>المزخرف</span></div>
-      <div class="row">
-        <span class="pill">يدعم النسخ الفوري</span>
-        <span class="pill">متوافق مع الموبايل</span>
-      </div>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="card">
-      <label class="muted" for="src">اكتب النص هنا:</label>
-      <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
-
-      <div class="row" style="margin-top:12px">
-        <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر...)" />
-      </div>
-
-      <div class="row" style="margin-top:12px; justify-content: space-between;">
-        <div class="tools">
-          <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
-          <button id="btnClear" class="btn">مسح</button>
-          <button id="btnSample" class="btn">نص تجريبي</button>
-        </div>
-        <span class="tip">💡 أفضل الزخارف للاتيني؛ للعربي جرّب "تطويل" و"تشكيل".</span>
-      </div>
-
-      <div class="row" style="margin-top:12px; gap: 6px;">
-        <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
-        <label class="pill"><input id="optTashkeel" type="checkbox" /> تشكيل</label>
-        <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
-        <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
-      </div>
-
-      <div class="loading" id="loadingIndicator">
-        <div class="spinner"></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="row" style="justify-content:space-between;align-items:center; margin-bottom: 12px;">
-        <div class="muted">الأنماط المتاحة</div>
-        <span id="count" class="pill">— نتيجة</span>
-      </div>
-
-      <div class="filters">
-        <button class="filter-btn active" data-filter="all">الكل</button>
-        <button class="filter-btn" data-filter="latin">لاتيني</button>
-        <button class="filter-btn" data-filter="arabic">عربي</button>
-        <button class="filter-btn" data-filter="decorative">زخرفي</button>
-      </div>
-
-      <div id="list" class="list" aria-live="polite"></div>
-    </section>
-  </main>
-
-  <div class="scroll-top" id="scrollTop">↑</div>
-  <div class="toast" id="toast"></div>
-
-  <script src="script.js"></script>
-</body>
-</html>
