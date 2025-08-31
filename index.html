@@ -1,306 +1,634 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>المزخرف — مولد نصوص مزخرفة</title>
-<meta name="description" content="المزخرف: اكتب نصك واحصل على عشرات الأشكال والخطوط المزخرفة القابلة للنسخ فورًا." />
-<style>
-  :root{
-    --bg:#0f172a; --panel:#0b1220; --muted:#94a3b8; --border:#1f2937; --accent:#06b6d4; --txt:#e5e7eb;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Arial}
-  header{position:sticky;top:0;background:#0f172acc;backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:5}
-  .wrap{max-width:1100px;margin:0 auto;padding:14px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .brand{display:flex;gap:8px;align-items:center;font-weight:800}
-  .brand .logo{filter:drop-shadow(0 0 12px #00e5ff77)}
-  .muted{color:var(--muted)}
-  main .grid{display:grid;grid-template-columns:1fr;gap:14px;padding:14px}
-  @media(min-width:950px){ main .grid{grid-template-columns: 1fr 1fr} }
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px}
-  textarea,.input{width:100%;background:#0b1628;color:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none}
-  .btn{border:1px solid var(--border);background:#142033;color:#d9f6ff;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn:hover{filter:brightness(1.08)} .btn[disabled]{opacity:.5;cursor:not-allowed}
-  .accent{background:rgba(6,182,212,.2)}
-  .list{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto;padding-right:2px}
-  .item{border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1322}
-  .item .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .item .name{font-weight:700;color:#aeeaff}
-  .out{white-space:pre-wrap;direction:auto;margin-top:6px}
-  .tools{display:flex;gap:8px;flex-wrap:wrap}
-  .pill{background:#0e1a2d;border:1px solid #22324a;border-radius:999px;padding:4px 10px;color:#b9d7f2;font-size:12px}
-  .tip{font-size:12px;color:#9fb3c8}
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>المزخرف — مولد نصوص مزخرفة متطور</title>
+    <meta name="description" content="المزخرف: اكتب نصك واحصل على عشرات الأشكال والخطوط المزخرفة القابلة للنسخ فورًا." />
+    <style>
+        :root {
+            --bg: #0f172a; --panel: #0b1220; --muted: #94a3b8; --border: #1f2937; 
+            --accent: #06b6d4; --txt: #e5e7eb; --success: #10b981; --warning: #f59e0b;
+            --cat-latin: #06b6d4; --cat-arabic: #f59e0b; --cat-decorative: #a855f7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0 }
+        body { background: var(--bg); color: var(--txt); font: 15px/1.6 system-ui, Segoe UI, Arial; padding-bottom: 20px }
+        
+        /* تحسينات التصميم */
+        header {
+            position: sticky; top: 0; background: #0f172acc; 
+            backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); z-index: 5
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 14px }
+        .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+        .brand { display: flex; gap: 8px; align-items: center; font-weight: 800 }
+        .brand .logo { filter: drop-shadow(0 0 12px #00e5ff77) }
+        .muted { color: var(--muted) }
+        main .grid { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 14px }
+        
+        @media (min-width: 950px) { 
+            main .grid { grid-template-columns: 1fr 1fr } 
+        }
+        
+        .card {
+            background: var(--panel); border: 1px solid var(--border); 
+            border-radius: 16px; padding: 16px; position: relative
+        }
+        
+        textarea, .input {
+            width: 100%; background: #0b1628; color: #fff; border: 1px solid var(--border); 
+            border-radius: 12px; padding: 12px 14px; outline: none; transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        textarea:focus, .input:focus { border-color: var(--accent) }
+        
+        .btn {
+            border: 1px solid var(--border); background: #142033; color: #d9f6ff; 
+            border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn:hover { filter: brightness(1.08); border-color: var(--accent) }
+        .btn[disabled] { opacity: .5; cursor: not-allowed }
+        .btn.success { background: rgba(16, 185, 129, 0.2); border-color: var(--success) }
+        .btn.accent { background: rgba(6, 182, 212, 0.2); border-color: var(--accent) }
+        
+        .list {
+            display: grid; grid-template-columns: 1fr; gap: 10px; 
+            max-height: 65vh; overflow: auto; padding-right: 2px;
+        }
+        
+        .item {
+            border: 1px solid var(--border); border-radius: 12px; padding: 12px; 
+            background: #0b1322; transition: transform 0.2s, border-color 0.2s;
+        }
+        .item:hover { border-color: var(--accent); transform: translateY(-2px) }
+        
+        .item .head { display: flex; justify-content: space-between; align-items: center; gap: 8px }
+        .item .name { font-weight: 700; color: #aeeaff }
+        .out { white-space: pre-wrap; direction: auto; margin-top: 8px; min-height: 1.2em }
+        .tools { display: flex; gap: 6px; flex-wrap: wrap }
+        
+        .pill {
+            background: #0e1a2d; border: 1px solid #22324a; border-radius: 999px; 
+            padding: 4px 10px; color: #b9d7f2; font-size: 12px; display: inline-flex; 
+            align-items: center; gap: 6px;
+        }
+        
+        .tip { font-size: 12px; color: #9fb3c8 }
+        
+        /* فئات التصنيف */
+        .category { 
+            display: inline-block; padding: 2px 8px; border-radius: 4px; 
+            font-size: 11px; margin-left: 8px; 
+        }
+        .category-latin { background: rgba(6, 182, 212, 0.2); color: var(--cat-latin) }
+        .category-arabic { background: rgba(245, 158, 11, 0.2); color: var(--cat-arabic) }
+        .category-decorative { background: rgba(168, 85, 247, 0.2); color: var(--cat-decorative) }
+        
+        /* تحسينات الأداء */
+        .loading { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(11, 18, 32, 0.8); display: flex; 
+            justify-content: center; align-items: center; z-index: 10;
+            border-radius: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .loading.visible { opacity: 1; pointer-events: auto }
+        
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid transparent;
+            border-top: 3px solid var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg) }
+            100% { transform: rotate(360deg) }
+        }
+        
+        /* تحسينات التنظيم */
+        .filters {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+            padding: 8px; background: #0b1322; border-radius: 10px;
+        }
+        
+        .filter-btn {
+            padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+            background: transparent; color: var(--muted); cursor: pointer;
+            transition: all 0.2s; font-size: 12px;
+        }
+        
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--accent); color: #0f172a; border-color: var(--accent);
+        }
+        
+        /* تحسينات التنقل */
+        .scroll-top {
+            position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px;
+            border-radius: 50%; background: var(--accent); color: #0f172a;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; opacity: 0; transition: opacity 0.3s; z-index: 100;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+        
+        .scroll-top.visible { opacity: 1 }
+        
+        /* تحسينات التنبيهات */
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--panel); border: 1px solid var(--border);
+            padding: 12px 16px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 8px; z-index: 1000;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        
+        .toast.visible { opacity: 1 }
+        
+        .toast.success { border-left: 4px solid var(--success) }
+        .toast.error { border-left: 4px solid #ef4444 }
+    </style>
 </head>
 <body>
-<header>
-  <div class="wrap row" style="justify-content:space-between">
-    <div class="brand"><span class="logo">✨</span> <span>المزخرف</span></div>
-    <div class="row">
-      <span class="pill">يدعم النسخ الفوري</span>
-      <span class="pill">متوافق مع الموبايل</span>
-    </div>
-  </div>
-</header>
+    <header>
+        <div class="wrap row" style="justify-content:space-between">
+            <div class="brand"><span class="logo">✨</span> <span>المزخرف</span></div>
+            <div class="row">
+                <span class="pill">يدعم النسخ الفوري</span>
+                <span class="pill">متوافق مع الموبايل</span>
+            </div>
+        </div>
+    </header>
 
-<main class="wrap">
-  <section class="card">
-    <label class="muted" for="src">اكتب النص هنا:</label>
-    <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
-    <div class="row" style="margin-top:8px">
-      <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر...)" />
-    </div>
-    <div class="row" style="margin-top:8px">
-      <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
-      <button id="btnClear"   class="btn">مسح</button>
-      <span class="tip">💡 أفضل الزخارف للاتيني؛ للعربي جرّب “تطويل” و”تشكيل خفيف”.</span>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
-      <label class="pill"><input id="optTashkeel" type="checkbox" /> تشكيل خفيف</label>
-      <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
-      <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
-    </div>
-  </section>
+    <main class="wrap">
+        <section class="card">
+            <label class="muted" for="src">اكتب النص هنا:</label>
+            <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
+            
+            <div class="row" style="margin-top:12px">
+                <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر...)" />
+            </div>
+            
+            <div class="row" style="margin-top:12px; justify-content: space-between;">
+                <div class="tools">
+                    <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
+                    <button id="btnClear" class="btn">مسح</button>
+                    <button id="btnSample" class="btn">نص تجريبي</button>
+                </div>
+                <span class="tip">💡 أفضل الزخارف للاتيني؛ للعربي جرّب "تطويل" و"تشكيل خفيف".</span>
+            </div>
+            
+            <div class="row" style="margin-top:12px; gap: 6px;">
+                <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
+                <label class="pill"><input id="optTashkeel" type="checkbox" /> تشكيل خفيف</label>
+                <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
+                <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
+            </div>
+            
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+            </div>
+        </section>
 
-  <section class="card">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div class="muted">الأنماط المتاحة</div>
-      <span id="count" class="pill">— نتيجة</span>
-    </div>
-    <div id="list" class="list" aria-live="polite"></div>
-  </section>
+        <section class="card">
+            <div class="row" style="justify-content:space-between;align-items:center; margin-bottom: 12px;">
+                <div class="muted">الأنماط المتاحة</div>
+                <span id="count" class="pill">— نتيجة</span>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">الكل</button>
+                <button class="filter-btn" data-filter="latin">لاتيني</button>
+                <button class="filter-btn" data-filter="arabic">عربي</button>
+                <button class="filter-btn" data-filter="decorative">زخرفي</button>
+            </div>
+            
+            <div id="list" class="list" aria-live="polite"></div>
+        </section>
 
-  <section class="card">
-    <h3 style="margin:6px 0">ملاحظات سريعة</h3>
-    <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.7">
-      <li>بعض الأجهزة قد لا تدعم كل الحروف المظللة (𝔣𝔯𝔞𝔨𝔱𝔲𝔯، 𝓼𝓬𝓻𝓲𝓹𝓽…). لو شكل غريب ظهر، جرّب نمطًا آخر.</li>
-      <li>للعربي: “تطويل” يضيف ـ بين الحروف المناسبة، و“تشكيل خفيف” يضيف حركات متفرقة بدون مبالغة.</li>
-      <li>كل النتائج **نص قابل للنسخ**، مش صور.</li>
-    </ul>
-  </section>
-</main>
+        <section class="card">
+            <h3 style="margin:6px 0">ملاحظات سريعة</h3>
+            <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.7">
+                <li>بعض الأجهزة قد لا تدعم كل الحروف المظللة (𝔣𝔯𝔞𝔨𝔱𝔲𝔯، 𝓼𝓬𝓻𝓲𝓹𝓽…). لو شكل غريب ظهر، جرّب نمطًا آخر.</li>
+                <li>للعربي: "تطويل" يضيف ـ بين الحروف المناسبة، و"تشكيل خفيف" يضيف حركات متفرقة بدون مبالغة.</li>
+                <li>كل النتائج **نص قابل للنسخ**، مش صور.</li>
+                <li>يمكنك استخدام أزرار الفلترة لتصفية الأنماط حسب النوع.</li>
+            </ul>
+        </section>
+    </main>
+    
+    <div class="scroll-top" id="scrollTop">↑</div>
+    
+    <div class="toast" id="toast"></div>
 
-<script>
-/* ========= Helpers ========= */
-const $ = sel => document.querySelector(sel);
-const src = $('#src'), list = $('#list'), countEl = $('#count'), filterEl = $('#filter');
-const optK = $('#optKashida'), optT = $('#optTashkeel'), optD1 = $('#optDecor1'), optD2 = $('#optDecor2');
+    <script>
+        /* ========= Helpers ========= */
+        const $ = sel => document.querySelector(sel);
+        const $$ = sel => document.querySelectorAll(sel);
+        
+        const src = $('#src'), list = $('#list'), countEl = $('#count'), filterEl = $('#filter');
+        const optK = $('#optKashida'), optT = $('#optTashkeel'), optD1 = $('#optDecor1'), optD2 = $('#optDecor2');
+        const loadingIndicator = $('#loadingIndicator');
+        const scrollTopBtn = $('#scrollTop');
+        const toast = $('#toast');
+        
+        // إضافة تصنيفات للأنماط
+        const STYLES = [
+            {id:'plain',    name:'عادي (بدون تغيير)', fn:(t)=>t, category: 'all'},
+            {id:'bold',     name:'سميك Bold',          fn:(t)=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE), category: 'latin'},
+            {id:'italic',   name:'مائل Italic',        fn:(t)=>mapByOffset(t,0x1D434,0x1D44E,null), category: 'latin'},
+            {id:'boldit',   name:'سميك مائل',          fn:(t)=>mapByOffset(t,0x1D468,0x1D482,null), category: 'latin'},
+            {id:'sansb',    name:'Sans عريض',          fn:(t)=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC), category: 'latin'},
+            {id:'mono',     name:'Monospace',          fn:(t)=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6), category: 'latin'},
+            {id:'script',   name:'Script مزخرف',       fn:mapScript, category: 'latin'},
+            {id:'frak',     name:'Fraktur',            fn:mapFraktur, category: 'latin'},
+            {id:'ds',       name:'Double‑Struck',      fn:(t)=>mapByOffset(t,0x1D538,0x1D552,0x1D7D8), category: 'latin'},
+            {id:'circ',     name:'حروف داخل دوائر',    fn:mapCircled, category: 'decorative'},
+            {id:'sup',      name:'حجم صغير (Superscript)', fn:mapSup, category: 'decorative'},
+            {id:'sc',       name:'Small‑Caps (تقريبي)', fn:mapSmallCaps, category: 'latin'},
+            {id:'flip',     name:'مقلوب (Upside‑Down)', fn:mapUpside, category: 'decorative'},
+            // Arabic-oriented
+            {id:'kashida',  name:'عربي — تطويل (ـ)',  fn:applyKashida, category: 'arabic'},
+            {id:'tashkeel', name:'عربي — تشكيل خفيف',  fn:applyTashkeelLight, category: 'arabic'},
+        ];
+        
+        // دالة مساعدة للانتظار
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // إظهار وإخفاء مؤشر التحميل
+        function showLoading(show) {
+            if (show) {
+                loadingIndicator.classList.add('visible');
+            } else {
+                loadingIndicator.classList.remove('visible');
+            }
+        }
+        
+        // إظهار التنبيهات
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type} visible`;
+            
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 3000);
+        }
+        
+        // النسخ إلى الحافظة
+        function copyText(s) {
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(s);
+                return true;
+            } else {
+                const t = document.createElement('textarea'); 
+                t.value = s; 
+                document.body.appendChild(t);
+                t.select(); 
+                const result = document.execCommand('copy'); 
+                t.remove();
+                return result;
+            }
+        }
+        
+        // تهيئة الأحداث
+        function initEvents() {
+            // إضافة debounce لتحسين الأداء
+            const debouncedGenAll = debounce(genAll, 300);
+            
+            ['input', 'change'].forEach(ev => {
+                src.addEventListener(ev, () => {
+                    showLoading(true);
+                    debouncedGenAll();
+                });
+                
+                filterEl.addEventListener(ev, debouncedGenAll);
+                optK.addEventListener(ev, debouncedGenAll);
+                optT.addEventListener(ev, debouncedGenAll);
+                optD1.addEventListener(ev, debouncedGenAll);
+                optD2.addEventListener(ev, debouncedGenAll);
+            });
+            
+            // نسخ الكل
+            document.getElementById('btnCopyAll').onclick = () => {
+                const texts = [...list.querySelectorAll('.out')]
+                    .map(d => d.textContent)
+                    .filter(text => text && text !== '—')
+                    .join('\n');
+                
+                if (texts) {
+                    const success = copyText(texts);
+                    if (success) {
+                        showToast('تم نسخ كل النتائج بنجاح');
+                    } else {
+                        showToast('حدث خطأ أثناء النسخ', 'error');
+                    }
+                } else {
+                    showToast('لا يوجد نصوص للنسخ', 'error');
+                }
+            };
+            
+            // مسح النص
+            document.getElementById('btnClear').onclick = () => {
+                src.value = ''; 
+                genAll();
+                showToast('تم مسح النص');
+            };
+            
+            // نص تجريبي
+            document.getElementById('btnSample').onclick = () => {
+                src.value = src.value || 'نص تجريبي Test';
+                genAll();
+            };
+            
+            // تصفية حسب النوع
+            $$('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    $$('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const filter = btn.dataset.filter;
+                    $$('.item').forEach(item => {
+                        if (filter === 'all' || item.dataset.category === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // الانتقال للأعلى
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            });
+        }
+        
+        // تهيئة التطبيق
+        function init() {
+            initEvents();
+            genAll();
+            
+            // تحميل النص المحفوظ
+            const KEY = 'mazakhref_input_v1';
+            const savedText = localStorage.getItem(KEY);
+            if (savedText) {
+                src.value = savedText;
+            }
+            
+            // حفظ أثناء الكتابة
+            src.addEventListener('input', () => {
+                localStorage.setItem(KEY, src.value);
+            });
+        }
+        
+        // تشغيل التهيئة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // باقي الدوال الموجودة في الكود الأصلي تبقى كما هي
+        // (mapByOffset, mapScript, mapFraktur, mapCircled, mapSup, 
+        // mapSmallCaps, mapUpside, applyKashida, applyTashkeelLight, 
+        // decorate, genAll, escapeHtml, decodeHtml)
+        // ... [الكود الأصلي هنا] ...
+        <script>
+// ======== Core mappers ========
+const LAT_A=65, LAT_Z=90, lat_a=97, lat_z=122, D0=48, D9=57;
 
-const AR_LET = /[\u0621-\u064A]/;
-function isArabic(ch){ return AR_LET.test(ch); }
-
-/* ========= Unicode Maps (Latin) ========= */
-const base = {
-  u: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  l: 'abcdefghijklmnopqrstuvwxyz',
-  d: '0123456789'
-};
-function mapByOffset(txt, offU, offL, offD){
-  let out = '';
-  for (const ch of txt){
-    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch), id = base.d.indexOf(ch);
-    if (iu>-1 && offU!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x41 + offU);
-    else if (il>-1 && offL!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x61 + offL);
-    else if (id>-1 && offD!=null) out += String.fromCodePoint(ch.codePointAt(0) - 0x30 + offD);
-    else out += ch;
+// Generic map by Unicode offset for A..Z, a..z, 0..9
+function mapByOffset(t, offA, offa, off0){
+  const out=[];
+  for (const ch of t){
+    const c=ch.codePointAt(0);
+    if (c>=LAT_A && c<=LAT_Z && offA){ out.push(String.fromCodePoint(offA+(c-LAT_A))); }
+    else if (c>=lat_a && c<=lat_z && offa){ out.push(String.fromCodePoint(offa+(c-lat_a))); }
+    else if (c>=D0 && c<=D9 && off0){ out.push(String.fromCodePoint(off0+(c-D0))); }
+    else out.push(ch);
   }
-  return out;
+  return out.join('');
 }
 
-// Special maps (script/fraktur exceptions, circled, small, upside)
-const OV_FRK = { 'C':'\u212D','H':'\u210C','I':'\u2111','R':'\u211C','Z':'\u2128' };
-const OV_SCR = { 'B':'\u212C','E':'\u2130','F':'\u2131','H':'\u210B','I':'\u2110','L':'\u2112','M':'\u2133','R':'\u211B' };
-
-function mapScript(txt){
-  let out='';
-  for (const ch of txt){
-    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
-    if (iu>-1){
-      out += OV_SCR[ch] || String.fromCodePoint(0x1D49C + iu);
-    } else if (il>-1){
-      out += String.fromCodePoint(0x1D4B6 + il);
-    } else out += ch;
-  }
-  return out;
-}
-function mapFraktur(txt){
-  let out='';
-  for (const ch of txt){
-    const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
-    if (iu>-1){
-      out += OV_FRK[ch] || String.fromCodePoint(0x1D504 + iu);
-    } else if (il>-1){
-      out += String.fromCodePoint(0x1D51E + il);
-    } else out += ch;
-  }
-  return out;
-}
-function mapCircled(txt){
-  let out='';
-  for (const ch of txt){
-    const iu=base.u.indexOf(ch), il=base.l.indexOf(ch), id=base.d.indexOf(ch);
-    if (iu>-1) out += String.fromCodePoint(0x24B6 + iu);
-    else if (il>-1) out += String.fromCodePoint(0x24D0 + il);
-    else if (id>-1){
-      if (ch==='0') out += '\u24EA';
-      else out += String.fromCodePoint(0x2460 + (id-1));
-    } else out += ch;
-  }
-  return out;
-}
-
-// Tiny superscripts (approx)
-const SUP = {
-  a:'ᵃ',b:'ᵇ',c:'ᶜ',d:'ᵈ',e:'ᵉ',f:'ᶠ',g:'ᵍ',h:'ʰ',i:'ᶦ',j:'ʲ',k:'ᵏ',l:'ˡ',m:'ᵐ',n:'ⁿ',o:'ᵒ',p:'ᵖ',q:'ᑫ',r:'ʳ',s:'ˢ',t:'ᵗ',u:'ᵘ',v:'ᵛ',w:'ʷ',x:'ˣ',y:'ʸ',z:'ᶻ',
-  A:'ᴬ',B:'ᴮ',D:'ᴰ',E:'ᴱ',G:'ᴳ',H:'ᴴ',I:'ᴵ',J:'ᴶ',K:'ᴷ',L:'ᴸ',M:'ᴹ',N:'ᴺ',O:'ᴼ',P:'ᴾ',R:'ᴿ',T:'ᵀ',U:'ᵁ',V:'ⱽ',W:'ᵂ',
-  '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'
-};
-function mapSup(txt){ return [...txt].map(ch=>SUP[ch]||ch).join(''); }
-
-// Small-caps (approx using Unicode)
-const SC = {'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
-function mapSmallCaps(txt){ return [...txt].map(ch=>SC[ch]||SC[ch?.toLowerCase()]||ch).join(''); }
-
-// Upside-down
-const UP = {'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'ן','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z',
-'A':'∀','B':'ꓭ','C':'Ɔ','D':'◖','E':'Ǝ','F':'Ⅎ','G':'⅁','H':'H','I':'I','J':'ſ','K':'ʞ','L':'˥','M':'W','N':'N','O':'O','P':'Ԁ','Q':'Ό','R':'ᴚ','S':'S','T':'⊥','U':'∩','V':'Λ','W':'M','X':'X','Y':'⅄','Z':'Z',
-'0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6'};
-function mapUpside(txt){
-  return [...txt].reverse().map(ch=>UP[ch]||ch).join('');
-}
-
-/* ========= Arabic helpers ========= */
-function applyKashida(s){
-  // أضف ـ بين الحروف العربية المتجاورة فقط
-  const chars = [...s];
-  let out = '';
-  for (let i=0;i<chars.length;i++){
-    out += chars[i];
-    if ( AR_LET.test(chars[i]) && AR_LET.test(chars[i+1]||'') ) out += '\u0640'; // ـ
-  }
-  return out;
-}
-function applyTashkeelLight(s){
-  const diacs = ['\u064E','\u064F','\u0650','\u0652']; // فتحة، ضمة، كسرة، سكون
-  let out='', n=0;
-  for (const ch of s){
-    out += ch;
-    if (AR_LET.test(ch) && (++n%2===0)) out += diacs[n%diacs.length];
-  }
-  return out;
-}
-function decorate(s,mode){
-  if(!s.trim()) return s;
-  if(mode===1) return `•✧ ${s} ✧•`;
-  if(mode===2) return `⌯⟡ ${s} ⟡⌯`;
+// Script (𝓐…𝔃) with Unicode oddities handled
+function mapScript(t){
+  // base offsets
+  let s = mapByOffset(t, 0x1D49C, 0x1D4B6, null);
+  // fix missing letters by manual replacements
+  const repl = {
+    'B':'\u212C','E':'\u2130','F':'\u2131','H':'\u210B','I':'\u2110','L':'\u2112','M':'\u2133','R':'\u211B',
+    'e':'\u212F','g':'\u210A','o':'\u2134'
+  };
+  s = s.split('').map((ch,i)=> {
+    const orig = t[i];
+    return repl[orig] ?? ch;
+  }).join('');
   return s;
 }
 
-/* ========= Styles ========= */
-const STYLES = [
-  {id:'plain',    name:'عادي (بدون تغيير)', fn:(t)=>t},
-  {id:'bold',     name:'سميك Bold',          fn:(t)=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE)},
-  {id:'italic',   name:'مائل Italic',        fn:(t)=>mapByOffset(t,0x1D434,0x1D44E,null)},
-  {id:'boldit',   name:'سميك مائل',          fn:(t)=>mapByOffset(t,0x1D468,0x1D482,null)},
-  {id:'sansb',    name:'Sans عريض',          fn:(t)=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC)},
-  {id:'mono',     name:'Monospace',          fn:(t)=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6)},
-  {id:'script',   name:'Script مزخرف',       fn:mapScript},
-  {id:'frak',     name:'Fraktur',            fn:mapFraktur},
-  {id:'ds',       name:'Double‑Struck',      fn:(t)=>mapByOffset(t,0x1D538,0x1D552,0x1D7D8)},
-  {id:'circ',     name:'حروف داخل دوائر',    fn:mapCircled},
-  {id:'sup',      name:'حجم صغير (Superscript)', fn:mapSup},
-  {id:'sc',       name:'Small‑Caps (تقريبي)', fn:mapSmallCaps},
-  {id:'flip',     name:'مقلوب (Upside‑Down)', fn:mapUpside},
-  // Arabic-oriented
-  {id:'kashida',  name:'عربي — تطويل (ـ)',  fn:applyKashida},
-  {id:'tashkeel', name:'عربي — تشكيل خفيف',  fn:applyTashkeelLight},
-];
+// Fraktur (𝔄…𝔷)
+function mapFraktur(t){
+  let s = mapByOffset(t, 0x1D504, 0x1D51E, null);
+  const repl = { 'C':'\u212D','H':'\u210C','I':'\u2111','R':'\u211C','Z':'\u2128' };
+  s = s.split('').map((ch,i)=> repl[t[i]] ?? ch).join('');
+  return s;
+}
 
-/* ========= Render ========= */
-function genAll(){
-  const raw = src.value || '';
-  const mods = {
-    k: optK.checked,
-    t: optT.checked,
-    d1: optD1.checked,
-    d2: optD2.checked,
+// Double-Struck 𝔻𝟘… with fixes
+function mapDouble(t){
+  let s = mapByOffset(t, 0x1D538, 0x1D552, 0x1D7D8);
+  const repl = { 'C':'\u2102','H':'\u210D','N':'\u2115','P':'\u2119','Q':'\u211A','R':'\u211D','Z':'\u2124' };
+  s = s.split('').map((ch,i)=> repl[t[i]] ?? ch).join('');
+  return s;
+}
+
+// Circled Ⓐⓩ ①⑨
+function mapCircled(t){
+  const out=[];
+  for (const ch of t){
+    const c=ch.codePointAt(0);
+    if (c>=LAT_A && c<=LAT_Z) out.push(String.fromCodePoint(0x24B6+(c-LAT_A)));
+    else if (c>=lat_a && c<=lat_z) out.push(String.fromCodePoint(0x24D0+(c-lat_a)));
+    else if (c>=D0 && c<=D9){
+      const map = ['⓿','①','②','③','④','⑤','⑥','⑦','⑧','⑨'];
+      out.push(map[c-D0]);
+    } else out.push(ch);
+  }
+  return out.join('');
+}
+
+// Superscript small look
+function mapSup(t){
+  const supMap = {
+    '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',
+    'a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ',
+    'n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ',
+    'A':'ᴬ','B':'ᴮ','D':'ᴰ','E':'ᴱ','G':'ᴳ','H':'ᴴ','I':'ᴵ','J':'ᴶ','K':'ᴷ','L':'ᴸ','M':'ᴹ',
+    'N':'ᴺ','O':'ᴼ','P':'ᴾ','R':'ᴿ','T':'ᵀ','U':'ᵁ','V':'ⱽ','W':'ᵂ','+':'⁺','-':'⁻','(':'⁽',')':'⁾'
   };
-  const q = (filterEl.value||'').trim().toLowerCase();
-  const results = [];
+  return [...t].map(ch=>supMap[ch]??ch).join('');
+}
 
-  for (const st of STYLES){
-    if (q && !(`${st.id} ${st.name}`.toLowerCase().includes(q))) continue;
-    let out = st.fn(raw);
-    // optional decorations for Arabic/any
-    if (mods.k && st.id!=='kashida') out = applyKashida(out);
-    if (mods.t && st.id!=='tashkeel') out = applyTashkeelLight(out);
-    if (mods.d1) out = decorate(out,1);
-    if (mods.d2) out = decorate(out,2);
+// Small-caps (تقريبي)
+function mapSmallCaps(t){
+  const map = {
+    'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ғ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ',
+    'm':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'
+  };
+  return [...t].map(ch=>{
+    const low = ch.toLowerCase();
+    return map[low] ?? ch;
+  }).join('');
+}
 
-    results.push({id:st.id, name:st.name, text:out});
+// Upside-down
+const UPS_MAP = new Map(Object.entries({
+  'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'ן','m':'ɯ',
+  'n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z',
+  'A':'∀','C':'Ɔ','E':'Ǝ','F':'Ⅎ','G':'פ','J':'ſ','L':'˥','M':'W','P':'Ԁ','R':'ᴚ','T':'⊥','U':'∩','V':'Λ','W':'M','Y':'⅄',
+  '0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6', '.':'˙', ',':'\'', '\'':',','"':',,',
+  '_':'‾','&':'⅋','?':'¿','!':'¡','(' : ')', ')' : '(', '[':']',']':'[','{':'}','}':'{','<':'>','>':'<'
+}));
+function mapUpside(t){
+  return [...t].reverse().map(ch=>UPS_MAP.get(ch)??ch).join('');
+}
+
+// Arabic — تطويل (كشيدة)
+const AR_KASHIDA = 'ـ';
+function applyKashida(t){
+  // تطويل بسيط بين الحروف العربية القابلة للوصل
+  const joiners = /[\u0626-\u06D3]/; // نطاق تقريبي
+  const letters = [...t];
+  const out=[];
+  for (let i=0;i<letters.length;i++){
+    out.push(letters[i]);
+    if (i<letters.length-1 && joiners.test(letters[i]) && joiners.test(letters[i+1]) && letters[i] !== ' ' && letters[i+1] !== ' ') {
+      out.push(AR_KASHIDA);
+    }
   }
+  return out.join('');
+}
 
-  list.innerHTML = results.map(r=>`
-    <div class="item">
-      <div class="head">
-        <div class="name">${r.name}</div>
-        <div class="tools">
-          <button class="btn" data-copy="${escapeHtml(r.text)}">نسخ</button>
-        </div>
+// Arabic — تشكيل خفيف
+const TASHKEEL = ['َ','ً','ُ','ٌ','ِ','ٍ','ْ','ّ'];
+function applyTashkeelLight(t){
+  const out=[];
+  let i=0;
+  for (const ch of t){
+    out.push(ch);
+    // أضف حركة خفيفة كل 3–5 أحرف عربية
+    if (/[\u0600-\u06FF]/.test(ch) && (i%4===2)){
+      out.push(TASHKEEL[i%TASHKEEL.length]);
+    }
+    i++;
+  }
+  return out.join('');
+}
+
+// زخارف إضافية حسب الخيارات
+function decorate(text){
+  const { checked: d1 } = document.getElementById('optDecor1');
+  const { checked: d2 } = document.getElementById('optDecor2');
+  let t = text;
+  if (d1) t = `•✧• ${t} •✧•`;
+  if (d2) t = `⌯⟡⌯ ${t} ⌯⟡⌯`;
+  return t;
+}
+
+// ======== Generator & UI ========
+function makeItem({id,name,category}, value){
+  const item = document.createElement('div');
+  item.className='item';
+  item.dataset.category = category;
+  item.innerHTML = `
+    <div class="head">
+      <div class="name">${name}
+        <span class="category category-${category}">${category==='latin'?'لاتيني':category==='arabic'?'عربي':category==='decorative'?'زخرفي':'—'}</span>
       </div>
-      <div class="out">${escapeHtml(r.text) || '<span class="muted">—</span>'}</div>
+      <div class="tools">
+        <button class="btn btn-copy" data-text="">نسخ</button>
+      </div>
     </div>
-  `).join('');
-
-  // bind copy
-  list.querySelectorAll('[data-copy]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const txt = btn.getAttribute('data-copy');
-      copyText(decodeHtml(txt));
-      btn.textContent='✓ تم النسخ'; setTimeout(()=>btn.textContent='نسخ',900);
-    });
+    <div class="out"></div>
+  `;
+  const out = item.querySelector('.out');
+  out.textContent = value || '—';
+  const btn = item.querySelector('.btn-copy');
+  btn.dataset.text = value || '';
+  btn.addEventListener('click', ()=>{
+    if (!btn.dataset.text){ showToast('لا يوجد نص لنسخه','error'); return; }
+    copyText(btn.dataset.text) ? showToast('تم النسخ ✅') : showToast('تعذر النسخ','error');
   });
-
-  countEl.textContent = results.length + ' نتيجة';
+  return item;
 }
-function copyText(s){
-  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(s);
-  else {
-    const t=document.createElement('textarea'); t.value=s; document.body.appendChild(t);
-    t.select(); document.execCommand('copy'); t.remove();
+
+function genAll(){
+  const raw = document.getElementById('src').value || '';
+  const filterText = (document.getElementById('filter').value||'').trim().toLowerCase();
+  const k = document.getElementById('optKashida').checked;
+  const t = document.getElementById('optTashkeel').checked;
+
+  const preArabic = k ? applyKashida(raw) : raw;
+  const preArabic2 = t ? applyTashkeelLight(preArabic) : preArabic;
+
+  const results = [];
+  for (const s of STYLES){
+    let txt = raw;
+    switch(s.id){
+      case 'plain': txt = raw; break;
+      case 'bold': txt = mapByOffset(raw,0x1D400,0x1D41A,0x1D7CE); break;
+      case 'italic': txt = mapByOffset(raw,0x1D434,0x1D44E,null); break;
+      case 'boldit': txt = mapByOffset(raw,0x1D468,0x1D482,null); break;
+      case 'sansb': txt = mapByOffset(raw,0x1D5D4,0x1D5EE,0x1D7EC); break;
+      case 'mono': txt = mapByOffset(raw,0x1D670,0x1D68A,0x1D7F6); break;
+      case 'script': txt = mapScript(raw); break;
+      case 'frak': txt = mapFraktur(raw); break;
+      case 'ds': txt = mapDouble(raw); break;
+      case 'circ': txt = mapCircled(raw); break;
+      case 'sup': txt = mapSup(raw); break;
+      case 'sc': txt = mapSmallCaps(raw); break;
+      case 'flip': txt = mapUpside(raw); break;
+      case 'kashida': txt = applyKashida(raw); break;
+      case 'tashkeel': txt = applyTashkeelLight(raw); break;
+      default: txt = s.fn ? s.fn(raw) : raw;
+    }
+
+    // دمج الزخارف الإضافية
+    txt = decorate((s.id==='kashida'||s.id==='tashkeel') ? preArabic2 : txt);
+
+    // فلترة بالاسم إن لزم
+    if (filterText && !s.name.toLowerCase().includes(filterText)) continue;
+
+    results.push({style:s, text: txt});
   }
+
+  // Render
+  list.innerHTML = '';
+  for (const r of results){
+    list.appendChild(makeItem(r.style, r.text));
+  }
+  countEl.textContent = `${results.length} نتيجة`;
+  showLoading(false);
 }
-function escapeHtml(s){ return s.replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
-function decodeHtml(s){ return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'); }
 
-/* ========= Events ========= */
-['input','change'].forEach(ev=>{
-  src.addEventListener(ev, genAll);
-  filterEl.addEventListener(ev, genAll);
-  optK.addEventListener(ev, genAll);
-  optT.addEventListener(ev, genAll);
-  optD1.addEventListener(ev, genAll);
-  optD2.addEventListener(ev, genAll);
-});
+// ======== Utilities already defined above ========
+// (copyText, showToast, showLoading موجودين)
 
-document.getElementById('btnCopyAll').onclick = ()=>{
-  const texts=[...list.querySelectorAll('.out')].map(d=>d.textContent).join('\n');
-  copyText(texts); alert('تم نسخ كل النتائج.');
-};
-document.getElementById('btnClear').onclick = ()=>{
-  src.value=''; genAll();
-};
-
-// Load sample + autosave
-const KEY='mazakhref_input_v1';
-src.value = localStorage.getItem(KEY) || '';
-src.addEventListener('input', ()=>localStorage.setItem(KEY, src.value));
-
-// initial
+// شغّل مولد النتائج أول مرة لو كان في نص محفوظ
 genAll();
 </script>
+    </script>
 </body>
-</html>
+  </html>
