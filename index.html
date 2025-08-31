@@ -1,1 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>المزخرف — مولّد نصوص مزخرفة (ملف واحد)</title>
+  <meta name="description" content="اكتب نصك واحصل على عشرات الأشكال المزخرفة القابلة للنسخ فورًا. ملف واحد يعمل مباشرة على GitHub Pages." />
+  <style>
+    :root{--bg:#0f172a;--panel:#0b1220;--muted:#94a3b8;--border:#1f2937;--accent:#06b6d4;--txt:#e5e7eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--cat-latin:#06b6d4;--cat-arabic:#f59e0b;--cat-decorative:#a855f7}
+    *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Arial;padding-bottom:28px}
+    header{position:sticky;top:0;background:#0f172acc;backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:5}
+    .wrap{max-width:1200px;margin:0 auto;padding:14px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800}.brand .logo{filter:drop-shadow(0 0 12px #00e5ff77)}.muted{color:var(--muted)}
+    main .grid{display:grid;grid-template-columns:1fr;gap:14px;padding:14px}@media(min-width:1050px){main .grid{grid-template-columns:2fr 1fr}}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;position:relative}.card h3{margin-bottom:8px}
+    textarea,.input,select{width:100%;background:#0b1628;color:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .2s;font-family:inherit}
+    textarea:focus,.input:focus,select:focus{border-color:var(--accent)}
+    .btn{border:1px solid var(--border);background:#142033;color:#d9f6ff;border-radius:10px;padding:8px 12px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+    .btn:hover{filter:brightness(1.08);border-color:var(--accent)}.btn[disabled]{opacity:.55;cursor:not-allowed}
+    .btn.success{background:rgba(16,185,129,.2);border-color:var(--success)}.btn.accent{background:rgba(6,182,212,.2);border-color:var(--accent)}.btn.warn{background:rgba(245,158,11,.2);border-color:var(--warning)}
+    .pill{background:#0e1a2d;border:1px solid #22324a;border-radius:999px;padding:4px 10px;color:#b9d7f2;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+    .tip{font-size:12px;color:#9fb3c8}.stat{font-size:12px;color:#b9d7f2}.kbd{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#cfefff;background:#0b1628;border:1px solid #22324a;border-radius:6px;padding:2px 6px}
+    .list{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto;padding-right:2px}
+    .item{border:1px solid var(--border);border-radius:12px;padding:12px;background:#0b1322;transition:transform .18s,border-color .18s,opacity .2s;opacity:0;transform:translateY(4px)}
+    .item:hover{border-color:var(--accent);transform:translateY(-2px)}.item._in{opacity:1;transform:none}
+    .item .head{display:flex;justify-content:space-between;align-items:center;gap:8px}.item .name{font-weight:700;color:#aeeaff}.item .tools{display:flex;gap:6px;flex-wrap:wrap}
+    .out{white-space:pre-wrap;direction:auto;margin-top:8px;min-height:1.2em;background:#0b1628;border:1px dashed #22324a;border-radius:8px;padding:8px}
+    .out.copied{box-shadow:0 0 0 9999px rgba(16,185,129,.08) inset;border-color:var(--success)}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:8px;background:#0b1322;border-radius:10px}
+    .filter-btn{padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;font-size:12px}
+    .filter-btn.active,.filter-btn:hover{background:var(--accent);color:#0f172a;border-color:var(--accent)}
+    .category{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin-inline-start:8px}
+    .category-latin{background:rgba(6,182,212,.2);color:var(--cat-latin)}.category-arabic{background:rgba(245,158,11,.2);color:var(--cat-arabic)}.category-decorative{background:rgba(168,85,247,.2);color:var(--cat-decorative)}
+    .loading{position:absolute;inset:0;background:rgba(11,18,32,.8);display:flex;justify-content:center;align-items:center;z-index:10;border-radius:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+    .loading.visible{opacity:1;pointer-events:auto}.spinner{width:32px;height:32px;border:3px solid transparent;border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .scroll-top{position:fixed;bottom:20px;left:20px;width:42px;height:42px;border-radius:50%;background:var(--accent);color:#0f172a;display:flex;justify-content:center;align-items:center;cursor:pointer;opacity:0;transition:opacity .3s;z-index:100;box-shadow:0 4px 12px rgba(6,182,212,.3)}
+    .scroll-top.visible{opacity:1}
+    .toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);background:var(--panel);border:1px solid var(--border);padding:12px 16px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;z-index:1000;opacity:0;transition:opacity .25s}
+    .toast.visible{opacity:1}.toast.success{border-inline-start:4px solid var(--success)}.toast.error{border-inline-start:4px solid var(--danger)}
+    .basket{display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow:auto}.basket .bitem{display:flex;gap:6px;align-items:center;border:1px dashed #2a3b54;border-radius:10px;padding:8px;background:#0b1628}.bitem .btext{flex:1;white-space:pre-wrap}
+    .row.gap12{gap:12px}.row.wrap-nowrap{flex-wrap:nowrap}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}.btn:focus{outline:2px solid var(--accent);outline-offset:2px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row" style="justify-content:space-between">
+      <div class="brand"><span class="logo">✨</span><span>المزخرف</span></div>
+      <div class="row">
+        <span class="pill">ملف واحد — جاهز للنشر</span>
+        <span class="pill" id="netState">متصل</span>
+      </div>
+    </div>
+  </header>
 
+  <main class="wrap">
+    <div class="grid">
+      <section class="card" aria-labelledby="inputLabel">
+        <div class="row" style="justify-content:space-between;align-items:end">
+          <div style="flex:1 1 460px">
+            <label id="inputLabel" class="muted" for="src">اكتب النص هنا:</label>
+            <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
+            <div class="row" style="margin-top:6px;justify-content:space-between">
+              <div class="muted" id="charCount">عدد الحروف: 0</div>
+              <div class="stat"><span id="perfMs">—</span> ms • <span id="resultCount">—</span> نتيجة</div>
+            </div>
+          </div>
+          <div style="flex:1 1 320px">
+            <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر, 𝔣 ...)" />
+            <div class="row" style="margin-top:6px">
+              <select id="copyMode" class="input" style="max-width:180px">
+                <option value="lines">نسخ: سطر/سطر</option>
+                <option value="csv">نسخ: CSV</option>
+                <option value="md">نسخ: Markdown</option>
+              </select>
+              <select id="decorPos" class="input" style="max-width:180px">
+                <option value="both">الزخرفة: قبل وبعد</option>
+                <option value="prefix">قبل فقط</option>
+                <option value="suffix">بعد فقط</option>
+                <option value="none">بدون زخرفة إضافية</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row gap12" style="margin-top:12px;justify-content:space-between">
+          <div class="row gap12">
+            <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
+            <label class="pill"><input id="optStripDia" type="checkbox" /> نزع التشكيل</label>
+            <label class="pill"><input id="optUnifyHamza" type="checkbox" /> توحيد الهمزات ↦ ا</label>
+            <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
+            <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
+          </div>
+          <div class="row gap12">
+            <label class="pill">تشكيل:
+              <select id="tashkeelLevel" class="input" style="width:auto">
+                <option value="off">مغلق</option>
+                <option value="light" selected>خفيف</option>
+                <option value="med">متوسط</option>
+                <option value="heavy">ثقيل</option>
+              </select>
+            </label>
+            <label class="pill"><input id="optPreview" type="checkbox" /> وضع المعاينة</label>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
+          <div class="tools row wrap-nowrap">
+            <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
+            <button id="btnCopyClean" class="btn">نسخ نظيف</button>
+            <button id="btnShare" class="btn">مشاركة</button>
+            <button id="btnRandom" class="btn">عشوائي</button>
+            <button id="btnClear" class="btn">مسح</button>
+            <button id="btnSample" class="btn">نص تجريبي</button>
+          </div>
+          <div class="tip">اختصارات: <span class="kbd">Ctrl/⌘+C</span> نسخ الكل • <span class="kbd">Ctrl/⌘+/</span> مسح • <span class="kbd">Ctrl/⌘+R</span> عشوائي</div>
+        </div>
+
+        <div class="loading" id="loadingIndicator"><div class="spinner"></div></div>
+      </section>
+
+      <aside class="card">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3>لوحة التحكم</h3><span class="pill">GitHub Pages ✓</span>
+        </div>
+
+        <div class="row" style="gap:8px;margin-bottom:10px">
+          <button class="filter-btn active" data-filter="all" title="كل الأنماط">الكل</button>
+          <button class="filter-btn" data-filter="latin" title="أنماط لاتينية">🅰 لاتيني</button>
+          <button class="filter-btn" data-filter="arabic" title="أنماط عربية">🏛️ عربي</button>
+          <button class="filter-btn" data-filter="decorative" title="أنماط زخرفية">🎨 زخرفي</button>
+        </div>
+
+        <div class="card" style="margin:-4px 0 10px 0;padding:12px">
+          <div class="row" style="justify-content:space-between"><strong>سلة المختارات</strong><span class="muted" id="basketCount">0</span></div>
+          <div class="basket" id="basket"></div>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button id="btnCopyBasket" class="btn success">نسخ السلة</button>
+            <button id="btnClearBasket" class="btn warn">تفريغ</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin:-4px 0 0 0;padding:12px">
+          <div class="row" style="justify-content:space-between"><strong>تاريخ آخر نصوص</strong><button id="btnClearHistory" class="btn" style="padding:4px 8px">مسح</button></div>
+          <div class="row" style="margin-top:8px">
+            <select id="historySelect" class="input" title="آخر 5 نصوص"></select>
+            <button id="btnLoadHistory" class="btn">تحميل</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="muted">الأنماط المتاحة</div><span id="count" class="pill">— نتيجة</span>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">الكل</button>
+        <button class="filter-btn" data-filter="latin">لاتيني</button>
+        <button class="filter-btn" data-filter="arabic">عربي</button>
+        <button class="filter-btn" data-filter="decorative">زخرفي</button>
+      </div>
+
+      <div id="list" class="list" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin:6px 0">ملاحظات سريعة</h3>
+      <ul style="margin:6px 0 0 0;padding-inline-start:18px;line-height:1.7">
+        <li>بعض الأجهزة قد لا تدعم كل الحروف المظللة (𝔣𝔯𝔞𝔨𝔱𝔲𝔯، 𝓼𝓬𝓻𝓲𝓹𝓽…). لو ظهر شكل مربعات، جرّب نمطًا آخر.</li>
+        <li>للعربي: "تطويل" يضيف ـ حيث يناسب، و"تشكيل" له مستويات: خفيف/متوسط/ثقيل.</li>
+        <li>كل النتائج <strong>نص قابل للنسخ</strong> (مش صور). جرّب اللمس المطوّل على النتيجة للنسخ السريع في الموبايل.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div class="scroll-top" id="scrollTop" title="إلى أعلى">↑</div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  // ===== DOM shortcuts & elements =====
+  const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+  const src=$('#src'),list=$('#list'),countEl=$('#count'),filterEl=$('#filter');
+  const optK=$('#optKashida'),optStrip=$('#optStripDia'),optHamza=$('#optUnifyHamza');
+  const optD1=$('#optDecor1'),optD2=$('#optDecor2'); const copyModeSel=$('#copyMode'),decorPosSel=$('#decorPos');
+  const tLev=$('#tashkeelLevel'),optPreview=$('#optPreview'); const loadingIndicator=$('#loadingIndicator');
+  const scrollTopBtn=$('#scrollTop'),toast=$('#toast'); const charCount=$('#charCount'),perfMs=$('#perfMs'),resultCount=$('#resultCount');
+  const basketEl=$('#basket'),basketCount=$('#basketCount'); const netState=$('#netState'); const historySelect=$('#historySelect');
+
+  // ===== Keys & helpers =====
+  const KEY_TXT='mazakhref_input_v1', PREF='mazakhref_prefs_v1', HIST_KEY='mazakhref_history_v1', MAX_HIST=5;
+  function showToast(m,t='success'){toast.textContent=m;toast.className=`toast ${t} visible`;setTimeout(()=>toast.classList.remove('visible'),2400)}
+  function copyText(s){if(!s)return false;if(navigator.clipboard?.writeText){navigator.clipboard.writeText(s);return true}
+    const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();return ok}
+  function showLoading(b){loadingIndicator.classList.toggle('visible',!!b)}
+  function smartDebounce(fn){let t,first=true;return(...a)=>{const n=(src.value||'').length,w=n<20?100:200;if(first){first=false;fn(...a);return}clearTimeout(t);t=setTimeout(()=>fn(...a),w)}}
+
+  // ===== Styles list =====
+  const STYLES=[
+    {id:'plain',name:'عادي (بدون تغيير)',fn:t=>t,category:'all'},
+    {id:'bold',name:'سميك Bold',fn:t=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE),category:'latin'},
+    {id:'italic',name:'مائل Italic',fn:t=>mapByOffset(t,0x1D434,0x1D44E,null),category:'latin'},
+    {id:'boldit',name:'سميك مائل',fn:t=>mapByOffset(t,0x1D468,0x1D482,null),category:'latin'},
+    {id:'sansb',name:'Sans عريض',fn:t=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC),category:'latin'},
+    {id:'mono',name:'Monospace',fn:t=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6),category:'latin'},
+    {id:'script',name:'Script مزخرف',fn:mapScript,category:'latin'},
+    {id:'frak',name:'Fraktur',fn:mapFraktur,category:'latin'},
+    {id:'ds',name:'Double-Struck',fn:mapDouble,category:'latin'},
+    {id:'circ',name:'حروف داخل دوائر',fn:mapCircled,category:'decorative'},
+    {id:'sup',name:'حجم صغير (Superscript)',fn:mapSup,category:'decorative'},
+    {id:'sc',name:'Small-Caps (تقريبي)',fn:mapSmallCaps,category:'latin'},
+    {id:'flip',name:'مقلوب (Upside-Down)',fn:mapUpside,category:'decorative'},
+    {id:'kashida',name:'عربي — تطويل (ـ)',fn:applyKashida,category:'arabic'},
+    {id:'tashkeel',name:'عربي — تشكيل',fn:t=>applyTashkeelLevel(t,tLev.value),category:'arabic'},
+  ];
+
+  // ===== Memo & basket & history =====
+  const memo=new Map();function withMemo(id,optKey,text,compute){const k=`${id}|${optKey}|${text}`;if(memo.has(k))return memo.get(k);const v=compute();memo.set(k,v);return v}
+  const basket=[];function updateBasket(){basketEl.innerHTML='';for(let i=0;i<basket.length;i++){const d=document.createElement('div');d.className='bitem';d.innerHTML=`<div class="btext">${escapeHtml(basket[i])}</div>`;const rm=document.createElement('button');rm.className='btn';rm.textContent='حذف';rm.onclick=()=>{basket.splice(i,1);updateBasket()};d.appendChild(rm);basketEl.appendChild(d)}basketCount.textContent=basket.length}
+  function loadHistory(){const arr=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');historySelect.innerHTML='';arr.forEach((t,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(t.length>40?t.slice(0,40)+'…':t)||'(فارغ)';historySelect.appendChild(o)})}
+  function pushHistory(text){if(!text)return;const arr=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');if(arr[0]===text)return;const filtered=[text,...arr.filter(x=>x!==text)].slice(0,MAX_HIST);localStorage.setItem(HIST_KEY,JSON.stringify(filtered));loadHistory()}
+
+  // ===== Unicode mappers =====
+  const LAT_A=65,LAT_Z=90,lat_a=97,lat_z=122,D0=48,D9=57;
+  function mapByOffset(t,offA,offa,off0){const out=[];for(const ch of t){const c=ch.codePointAt(0);
+    if(c>=LAT_A&&c<=LAT_Z&&offA)out.push(String.fromCodePoint(offA+(c-LAT_A)));
+    else if(c>=lat_a&&c<=lat_z&&offa)out.push(String.fromCodePoint(offa+(c-lat_a)));
+    else if(c>=D0&&c<=D9&&off0)out.push(String.fromCodePoint(off0+(c-D0)));
+    else out.push(ch)}return out.join('')}
+  function mapScript(t){let s=mapByOffset(t,0x1D49C,0x1D4B6,null);const repl={'B':'\\u212C','E':'\\u2130','F':'\\u2131','H':'\\u210B','I':'\\u2110','L':'\\u2112','M':'\\u2133','R':'\\u211B','e':'\\u212F','g':'\\u210A','o':'\\u2134'};s=s.split('').map((ch,i)=>repl[t[i]]??ch).join('');return s}
+  function mapFraktur(t){let s=mapByOffset(t,0x1D504,0x1D51E,null);const repl={'C':'\\u212D','H':'\\u210C','I':'\\u2111','R':'\\u211C','Z':'\\u2128'};s=s.split('').map((ch,i)=>repl[t[i]]??ch).join('');return s}
+  function mapDouble(t){let s=mapByOffset(t,0x1D538,0x1D552,0x1D7D8);const repl={'C':'\\u2102','H':'\\u210D','N':'\\u2115','P':'\\u2119','Q':'\\u211A','R':'\\u211D','Z':'\\u2124'};s=s.split('').map((ch,i)=>repl[t[i]]??ch).join('');return s}
+  function mapCircled(t){const out=[];for(const ch of t){const c=ch.codePointAt(0);
+    if(c>=LAT_A&&c<=LAT_Z)out.push(String.fromCodePoint(0x24B6+(c-LAT_A)));
+    else if(c>=lat_a&&c<=lat_z)out.push(String.fromCodePoint(0x24D0+(c-lat_a)));
+    else if(c>=D0&&c<=D9){const map=['⓿','①','②','③','④','⑤','⑥','⑦','⑧','⑨'];out.push(map[c-D0])}
+    else out.push(ch)}return out.join('')}
+  function mapSup(t){const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ','A':'ᴬ','B':'ᴮ','D':'ᴰ','E':'ᴱ','G':'ᴳ','H':'ᴴ','I':'ᴵ','J':'ᴶ','K':'ᴷ','L':'ᴸ','M':'ᴹ','N':'ᴺ','O':'ᴼ','P':'ᴾ','R':'ᴿ','T':'ᵀ','U':'ᵁ','V':'ⱽ','W':'ᵂ','+':'⁺','-':'⁻','(':'⁽',')':'⁾'};return[...t].map(ch=>sup[ch]??ch).join('')}
+  function mapSmallCaps(t){const m={'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ғ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};return[...t].map(ch=>m[ch.toLowerCase()]??ch).join('')}
+  const UPS_MAP=new Map(Object.entries({'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'ן','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z','A':'∀','C':'Ɔ','E':'Ǝ','F':'Ⅎ','G':'פ','J':'ſ','L':'˥','M':'W','P':'Ԁ','R':'ᴚ','T':'⊥','U':'∩','V':'Λ','W':'M','Y':'⅄','0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6','.':'˙',',':'\\'','\\'':',','"':',,','_':'‾','&':'⅋','?':'¿','!':'¡','(' : ')', ')' : '(', '[':']',']':'[','{':'}','}':'{','<':'>','>':'<'}));
+  function mapUpside(t){return[...t].reverse().map(ch=>UPS_MAP.get(ch)??ch).join('')}
+
+  // ===== Arabic processing =====
+  const NON_JOINERS=new Set('اأإآدذرزوىلا'.split(''));const TASHKEEL=['َ','ً','ُ','ٌ','ِ','ٍ','ْ','ّ'];
+  function stripArabicDiacritics(s){return s.replace(/[\\u064B-\\u065F\\u0670]/g,'')}
+  function unifyHamza(s){return s.replace(/[\\u0622\\u0623\\u0625]/g,'ا')}
+  function normalizeArabic(s){let t=s.normalize('NFC');if(optStrip.checked)t=stripArabicDiacritics(t);if(optHamza.checked)t=unifyHamza(t);return t}
+  function applyKashida(t){const L=[...t],A=/[\\u0621-\\u064A\\u066E-\\u06D3]/,C=/[\\u064B-\\u065F\\u0670]/;const isL=ch=>A.test(ch)&&!C.test(ch);const out=[];for(let i=0;i<L.length;i++){const cur=L[i],n=L[i+1];out.push(cur);if(!n)continue;if(isL(cur)&&isL(n)&&cur!==' '&&n!==' '&&!NON_JOINERS.has(cur)&&!C.test(n)&&!/[0-9A-Za-z]/.test(n))out.push('ـ')}return out.join('')}
+  function applyTashkeelLevel(t,level){if(level==='off')return t;const step=level==='light'?4:level==='med'?3:2;const out=[];let i=0;for(const ch of t){out.push(ch);if(/[\\u0600-\\u06FF]/.test(ch)&&(i%step===step-2))out.push(TASHKEEL[i%TASHKEEL.length]);i++}return out.join('')}
+
+  // ===== Decorations & utils =====
+  function decorate(x){const d1=optD1.checked,d2=optD2.checked;const pre=[d1?'•✧•':'',d2?'⌯⟡⌯':''].filter(Boolean).join(' '),suf=pre,pos=decorPosSel.value;if(!pre||pos==='none')return x;if(pos==='prefix')return pre+' '+x;if(pos==='suffix')return x+' '+suf;return pre+' '+x+' '+suf}
+  function escapeHtml(s){return(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+  function makeItem(style,value){
+    const item=document.createElement('div');item.className='item';item.dataset.category=style.category;
+    item.innerHTML=`<div class="head"><div class="name">${escapeHtml(style.name)}<span class="category category-${style.category}">${style.category==='latin'?'لاتيني':style.category==='arabic'?'عربي':style.category==='decorative'?'زخرفي':'—'}</span></div><div class="tools"><button class="btn btn-add">+</button><button class="btn btn-copy" data-text="">نسخ</button></div></div><div class="out"></div>`;
+    const out=item.querySelector('.out');out.textContent=value||'—';
+    const btnCopy=item.querySelector('.btn-copy');btnCopy.dataset.text=value||'';btnCopy.addEventListener('click',()=>{if(!btnCopy.dataset.text){showToast('لا يوجد نص لنسخه','error');return}if(copyText(btnCopy.dataset.text)){showToast('تم النسخ ✅');flashOk(btnCopy);out.classList.add('copied');setTimeout(()=>out.classList.remove('copied'),600)}else showToast('تعذر النسخ','error')});
+    const btnAdd=item.querySelector('.btn-add');btnAdd.addEventListener('click',()=>{if(value){basket.push(value);updateBasket();showToast('أُضيفت إلى السلة');flashOk(btnAdd)}});requestAnimationFrame(()=>item.classList.add('_in'));return item}
+
+  function renderList(res){const frag=document.createDocumentFragment();for(const r of res)frag.appendChild(makeItem(r.style,r.text));list.innerHTML='';list.appendChild(frag);countEl.textContent=`${res.length} نتيجة`}
+  function flashOk(btn){const o=btn.textContent;btn.textContent='تم ✅';btn.disabled=true;setTimeout(()=>{btn.textContent=o;btn.disabled=false},900)}
+  function formatForCopy(arr,mode){if(mode==='csv')return arr.map(x=>`"${x.replace(/"/g,'""')}"`).join(',');if(mode==='md')return arr.map(x=>`- ${x}`).join('\\n');return arr.join('\\n')}
+
+  // ===== Generation =====
+  function genAll(){
+    const t0=performance.now(),raw0=src.value||'',preview=optPreview.checked,work=preview?(raw0.match(/\\S+/)?.[0]||raw0.slice(0,20)):raw0,raw=normalizeArabic(work);
+    const k=optK.checked,lev=tLev.value;let ar=raw;if(k)ar=applyKashida(ar);if(lev!=='off')ar=applyTashkeelLevel(ar,lev);
+    const filter=(filterEl.value||'').trim().toLowerCase();const optKey=`${k}-${lev}-${optD1.checked}-${optD2.checked}-${decorPosSel.value}-${optStrip.checked}-${optHamza.checked}-${preview}`;
+    const results=[];for(const s of STYLES){const txt=withMemo(s.id,optKey,raw0,()=>{let base;switch(s.id){case'plain':base=raw;break;case'kashida':base=applyKashida(raw);break;case'tashkeel':base=applyTashkeelLevel(raw,lev);break;default:base=s.fn?s.fn(raw):raw}if(s.id==='kashida'||s.id==='tashkeel')base=ar;return decorate(base)});if(filter&&!(s.name.toLowerCase().includes(filter)||(txt||'').toLowerCase().includes(filter)))continue;results.push({style:s,text:txt})}
+    const seen=new Set(),uniq=[];for(const r of results){if(seen.has(r.text))continue;seen.add(r.text);uniq.push(r)}
+    renderList(uniq);resultCount.textContent=uniq.length;charCount.textContent='عدد الحروف: '+(src.value||'').length;perfMs.textContent=Math.round(performance.now()-t0);showLoading(false)
+  }
+  const debouncedGenAll=smartDebounce(genAll);
+
+  // ===== State sync / prefs =====
+  function syncHash(){const d={t:src.value,f:filterEl.value,k:optK.checked,tkh:tLev.value,d1:optD1.checked,d2:optD2.checked,dp:decorPosSel.value,sd:optStrip.checked,uh:optHamza.checked,pv:optPreview.checked};location.hash=encodeURIComponent(JSON.stringify(d))}
+  function loadHash(){if(location.hash.length>1){try{const d=JSON.parse(decodeURIComponent(location.hash.slice(1)));src.value=d.t||'';filterEl.value=d.f||'';optK.checked=!!d.k;tLev.value=d.tkh||'light';optD1.checked=!!d.d1;optD2.checked=!!d.d2;decorPosSel.value=d.dp||'both';optStrip.checked=!!d.sd;optHamza.checked=!!d.uh;optPreview.checked=!!d.pv}catch{}}}
+  function savePrefs(){localStorage.setItem(PREF,JSON.stringify({k:optK.checked,tkh:tLev.value,d1:optD1.checked,d2:optD2.checked,dp:decorPosSel.value,f:filterEl.value,sd:optStrip.checked,uh:optHamza.checked,pv:optPreview.checked}))}
+  function loadPrefs(){try{const p=JSON.parse(localStorage.getItem(PREF)||'{}');optK.checked=p.k||false;tLev.value=p.tkh||'light';optD1.checked=p.d1||false;optD2.checked=p.d2||false;decorPosSel.value=p.dp||'both';filterEl.value=p.f||'';optStrip.checked=p.sd||false;optHamza.checked=p.uh||false;optPreview.checked=p.pv||false}catch{}}
+
+  // ===== Net state & long-press =====
+  function updateNetState(){netState.textContent=navigator.onLine?'متصل':'أوفلاين';netState.style.background=navigator.onLine?'rgba(16,185,129,.2)':'rgba(245,158,11,.2)'}
+  window.addEventListener('online',updateNetState);window.addEventListener('offline',updateNetState);
+  function attachLongPressCopy(el){let t;el.addEventListener('touchstart',()=>t=setTimeout(()=>{copyText(el.textContent||'');showToast('تم النسخ 👍')},450));['touchend','touchmove','touchcancel'].forEach(e=>el.addEventListener(e,()=>clearTimeout(t)))}
+  function afterRenderEnhance(){[...document.querySelectorAll('.out')].forEach(attachLongPressCopy)}
+  const observer=new MutationObserver(()=>afterRenderEnhance());observer.observe(list,{childList:true})
+
+  // ===== Events =====
+  function initEvents(){
+    ['input','change'].forEach(ev=>{
+      src.addEventListener(ev,()=>{showLoading(true);debouncedGenAll();syncHash();savePrefs();pushHistory(src.value)});
+      filterEl.addEventListener(ev,()=>{debouncedGenAll();savePrefs();syncHash()});
+      [optK,optStrip,optHamza,optD1,optD2,tLev,decorPosSel,optPreview].forEach(el=>el.addEventListener(ev,()=>{debouncedGenAll();savePrefs();syncHash()}));
+    });
+    $('#btnCopyAll').onclick=()=>{const arr=[...list.querySelectorAll('.out')].map(d=>d.textContent).filter(Boolean);const ok=arr.length&&copyText(formatForCopy(arr,copyModeSel.value));showToast(ok?'تم نسخ النتائج ✅':'لا يوجد ما ينسخ',ok?'success':'error')};
+    $('#btnCopyClean').onclick=()=>{const arr=[...list.querySelectorAll('.out')].map(d=>d.textContent).filter(Boolean).map(x=>stripArabicDiacritics(x).replace(/ـ/g,''));const ok=arr.length&&copyText(formatForCopy(arr,copyModeSel.value));showToast(ok?'تم نسخ نسخة نظيفة ✅':'لا يوجد ما ينسخ',ok?'success':'error')};
+    $('#btnShare').onclick=()=>{const texts=[...list.querySelectorAll('.out')].map(d=>d.textContent).filter(Boolean).slice(0,10).join('\\n');if(navigator.share&&texts)navigator.share({text:texts}).catch(()=>{});else copyText(texts)&&showToast('تم نسخ النتائج للمشاركة ✅')};
+    $('#btnRandom').onclick=()=>{const items=[...document.querySelectorAll('.item')].filter(i=>i.style.display!=='none');if(!items.length)return;items[Math.floor(Math.random()*items.length)].querySelector('.btn-copy')?.click()};
+    $('#btnClear').onclick=()=>{src.value='';debouncedGenAll();showToast('تم مسح النص');syncHash();savePrefs()};
+    $('#btnSample').onclick=()=>{if(!src.value)src.value='نص تجريبي Test';debouncedGenAll();savePrefs();syncHash()};
+    $$('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{$$('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;$$('.item').forEach(it=>{it.style.display=(f==='all'||it.dataset.category===f)?'block':'none'})}));
+    $('#btnCopyBasket').onclick=()=>{const ok=basket.length&&copyText(formatForCopy(basket,copyModeSel.value));showToast(ok?'تم نسخ السلة ✅':'السلة فارغة',ok?'success':'error')};
+    $('#btnClearBasket').onclick=()=>{basket.length=0;updateBasket()};
+    $('#btnClearHistory').onclick=()=>{localStorage.removeItem(HIST_KEY);loadHistory()};
+    $('#btnLoadHistory').onclick=()=>{const arr=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');const idx=parseInt(historySelect.value,10);if(!isNaN(idx)&&arr[idx]!=null){src.value=arr[idx];debouncedGenAll()}};
+    document.addEventListener('keydown',e=>{const mac=navigator.platform.includes('Mac'),mod=mac?e.metaKey:e.ctrlKey;if(!mod)return;if(e.key.toLowerCase()==='c'){e.preventDefault();$('#btnCopyAll').click()}if(e.key==='/'){e.preventDefault();$('#btnClear').click()}if(e.key.toLowerCase()==='r'){e.preventDefault();$('#btnRandom').click()}});
+    scrollTopBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+    window.addEventListener('scroll',()=>{if(window.pageYOffset>300)scrollTopBtn.classList.add('visible');else scrollTopBtn.classList.remove('visible')});
+  }
+
+  // ===== Init & SW =====
+  function init(){loadPrefs();loadHash();updateNetState();loadHistory();initEvents();const saved=localStorage.getItem(KEY_TXT);if(saved&&!src.value)src.value=saved;src.addEventListener('input',()=>localStorage.setItem(KEY_TXT,src.value));debouncedGenAll();
+    if('serviceWorker'in navigator){const sw=`const C='mazakhref-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./'])));self.skipWaiting()});self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone();caches.open(C).then(c=>c.put(e.request,cp));return res}).catch(()=>r)))})`;const blob=new Blob([sw],{type:'text/javascript'});const url=URL.createObjectURL(blob);navigator.serviceWorker.register(url).catch(()=>{})}
+  }
+  document.addEventListener('DOMContentLoaded',init);
+  </script>
+</body>
+</html>
