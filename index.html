@@ -1,97 +1,418 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
 <title>المزخرف — مولد نصوص مزخرفة</title>
 <meta name="description" content="المزخرف: اكتب نصك واحصل على عشرات الأشكال والخطوط المزخرفة القابلة للنسخ فورًا." />
+
 <style>
   :root{
-    --bg:#0f172a; --panel:#0b1220; --muted:#94a3b8; --border:#1f2937; --accent:#06b6d4; --txt:#e5e7eb;
+    --bg0:#070b18;
+    --bg1:#0b1227;
+    --panel:#0b1326cc;
+    --panel2:#0b1326;
+    --border:rgba(148,163,184,.22);
+    --txt:#e5e7eb;
+    --muted:#9aa7bd;
+
+    /* 4 accent colors */
+    --c1:#06b6d4; /* cyan */
+    --c2:#a78bfa; /* purple */
+    --c3:#a3e635; /* lime */
+    --c4:#fbbf24; /* amber */
+
+    --shadow: 0 18px 60px rgba(0,0,0,.45);
+    --r1:18px;
+    --r2:14px;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,Segoe UI,Arial}
-  header{position:sticky;top:0;background:#0f172acc;backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:5}
-  .wrap{max-width:1100px;margin:0 auto;padding:14px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .brand{display:flex;gap:8px;align-items:center;font-weight:800}
-  .brand .logo{filter:drop-shadow(0 0 12px #00e5ff77)}
-  .muted{color:var(--muted)}
-  main .grid{display:grid;grid-template-columns:1fr;gap:14px;padding:14px}
-  @media(min-width:950px){ main .grid{grid-template-columns: 1fr 1fr} }
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px}
-  textarea,.input{width:100%;background:#0b1628;color:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none}
-  .btn{border:1px solid var(--border);background:#142033;color:#d9f6ff;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn:hover{filter:brightness(1.08)} .btn[disabled]{opacity:.5;cursor:not-allowed}
-  .accent{background:rgba(6,182,212,.2)}
-  .list{display:grid;grid-template-columns:1fr;gap:10px;max-height:65vh;overflow:auto;padding-right:2px}
-  .item{border:1px solid var(--border);border-radius:12px;padding:10px;background:#0b1322}
-  .item .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .item .name{font-weight:700;color:#aeeaff}
-  .out{white-space:pre-wrap;direction:auto;margin-top:6px}
-  .tools{display:flex;gap:8px;flex-wrap:wrap}
-  .pill{background:#0e1a2d;border:1px solid #22324a;border-radius:999px;padding:4px 10px;color:#b9d7f2;font-size:12px}
-  .tip{font-size:12px;color:#9fb3c8}
+
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  body{
+    margin:0;
+    color:var(--txt);
+    font: 15px/1.7 system-ui, "Segoe UI", Arial;
+    background:
+      radial-gradient(1100px 700px at 10% -10%, rgba(167,139,250,.22), transparent 60%),
+      radial-gradient(900px 600px at 95% 10%, rgba(6,182,212,.18), transparent 55%),
+      radial-gradient(900px 700px at 30% 120%, rgba(163,230,53,.12), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    overflow-x:hidden;
+  }
+
+  /* subtle pattern */
+  .bg-pattern{
+    position:fixed; inset:0; pointer-events:none; opacity:.10; mix-blend-mode:screen;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,.35) 1px, transparent 0);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(circle at 35% 0%, black 0 45%, transparent 70%);
+  }
+
+  header{
+    position:sticky; top:0; z-index:10;
+    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, rgba(7,11,24,.82), rgba(7,11,24,.55));
+    border-bottom:1px solid var(--border);
+  }
+
+  .wrap{ max-width:1100px; margin:0 auto; padding:14px; }
+  .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:900; letter-spacing:.3px;
+  }
+  .logo{
+    width:34px; height:34px; border-radius:12px;
+    background: radial-gradient(circle at 30% 30%, rgba(6,182,212,.9), rgba(167,139,250,.35), rgba(251,191,36,.15));
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 12px 40px rgba(6,182,212,.15);
+    display:grid; place-items:center;
+  }
+  .logo svg{ filter: drop-shadow(0 0 16px rgba(6,182,212,.35)); }
+
+  .pill{
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    color: #cfe9ff;
+    white-space:nowrap;
+  }
+  .pill.c1{ border-color: rgba(6,182,212,.35); }
+  .pill.c2{ border-color: rgba(167,139,250,.35); }
+  .pill.c3{ border-color: rgba(163,230,53,.35); }
+  .pill.c4{ border-color: rgba(251,191,36,.35); }
+
+  main{ padding: 10px 0 30px; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  @media(min-width:980px){
+    .grid{ grid-template-columns: 1fr 1fr; }
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(11,19,38,.75), rgba(11,19,38,.55));
+    border:1px solid var(--border);
+    border-radius: var(--r1);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:-2px;
+    background:
+      radial-gradient(500px 220px at 10% 0%, rgba(6,182,212,.18), transparent 70%),
+      radial-gradient(500px 220px at 90% 0%, rgba(167,139,250,.18), transparent 70%),
+      radial-gradient(560px 260px at 50% 110%, rgba(163,230,53,.10), transparent 70%);
+    pointer-events:none;
+  }
+  .card > *{ position:relative; z-index:1; }
+
+  .muted{ color:var(--muted); }
+  .title{
+    display:flex; align-items:center; gap:10px;
+    margin:0 0 8px 0;
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .title small{ font-weight:600; color: var(--muted); }
+
+  textarea, .input, select{
+    width:100%;
+    background: rgba(9,16,36,.95);
+    color: #fff;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius: var(--r2);
+    padding: 10px 12px;
+    outline:none;
+    transition: .15s ease;
+  }
+  textarea:focus, .input:focus, select:focus{
+    border-color: rgba(6,182,212,.55);
+    box-shadow: 0 0 0 4px rgba(6,182,212,.12);
+  }
+
+  .btn{
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(20,32,61,.75);
+    color: #eaffff;
+    border-radius: 12px;
+    padding: 9px 12px;
+    cursor:pointer;
+    transition:.15s ease;
+    display:inline-flex; gap:8px; align-items:center;
+  }
+  .btn:hover{ transform: translateY(-1px); filter:brightness(1.08); }
+  .btn:active{ transform: translateY(0px); }
+  .btn[disabled]{ opacity:.55; cursor:not-allowed; transform:none; }
+
+  .btn.primary{
+    background: linear-gradient(135deg, rgba(6,182,212,.35), rgba(167,139,250,.28));
+    border-color: rgba(6,182,212,.35);
+  }
+  .btn.good{
+    background: linear-gradient(135deg, rgba(163,230,53,.25), rgba(6,182,212,.18));
+    border-color: rgba(163,230,53,.30);
+  }
+  .btn.warn{
+    background: linear-gradient(135deg, rgba(251,191,36,.22), rgba(167,139,250,.12));
+    border-color: rgba(251,191,36,.28);
+  }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    border-radius: 999px;
+    padding: 6px 10px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    font-size: 13px;
+    color:#d9f6ff;
+    cursor:pointer;
+    user-select:none;
+  }
+  .chip input{ accent-color: var(--c1); }
+
+  .hero{
+    display:flex; gap:14px; align-items:center; justify-content:space-between;
+    padding: 10px 0 2px;
+  }
+  .hero .left{
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .hero h1{
+    margin:0;
+    font-size: 20px;
+    line-height:1.3;
+  }
+  .hero p{ margin:0; color: var(--muted); font-size:13px; }
+  .hero .art{
+    width: 150px; height: 62px; opacity:.95;
+    border-radius: 16px;
+    border:1px solid rgba(255,255,255,.10);
+    background: linear-gradient(135deg, rgba(6,182,212,.18), rgba(167,139,250,.12), rgba(251,191,36,.10));
+    display:grid; place-items:center;
+  }
+
+  .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .tab{
+    padding: 7px 10px;
+    border-radius: 999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    color: #cfe9ff;
+    cursor:pointer;
+    font-size: 13px;
+  }
+  .tab.active{
+    border-color: rgba(6,182,212,.40);
+    box-shadow: 0 0 0 4px rgba(6,182,212,.10);
+  }
+
+  .list{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-height: 62vh;
+    overflow:auto;
+    padding-right: 3px;
+  }
+  .item{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius: 14px;
+    background: rgba(7,11,24,.55);
+    padding: 10px;
+  }
+  .item .head{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .item .name{ font-weight:800; color:#bdefff; }
+  .out{
+    margin-top:6px;
+    white-space:pre-wrap;
+    direction:auto;
+    font-size: 15px;
+  }
+  .tools{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  .counter{ display:flex; gap:8px; align-items:center; justify-content:space-between; }
+
+  /* Toast */
+  .toast{
+    position:fixed;
+    bottom: 14px;
+    left: 14px;
+    z-index: 50;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    pointer-events:none;
+  }
+  .toast .t{
+    pointer-events:auto;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(7,11,24,.85);
+    box-shadow: var(--shadow);
+    color:#eaffff;
+    display:flex; gap:10px; align-items:flex-start;
+    animation: pop .18s ease;
+  }
+  .t .dot{
+    margin-top:4px;
+    width:10px; height:10px; border-radius:50%;
+    background: var(--c1);
+    box-shadow: 0 0 0 4px rgba(6,182,212,.12);
+  }
+  .t.good .dot{ background: var(--c3); box-shadow: 0 0 0 4px rgba(163,230,53,.12); }
+  .t.warn .dot{ background: var(--c4); box-shadow: 0 0 0 4px rgba(251,191,36,.12); }
+  @keyframes pop{ from{ transform: translateY(6px); opacity:0 } to{ transform:none; opacity:1 } }
+
+  a{ color:#bdefff; text-decoration:none }
+  .tip{ font-size:12px; color:#a9bad1; }
 </style>
 </head>
+
 <body>
+<div class="bg-pattern"></div>
+
 <header>
-  <div class="wrap row" style="justify-content:space-between">
-    <div class="brand"><span class="logo">✨</span> <span>المزخرف</span></div>
-    <div class="row">
-      <span class="pill">يدعم النسخ الفوري</span>
-      <span class="pill">متوافق مع الموبايل</span>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- Inline SVG icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l1.7 5.2H19l-4.3 3.1L16.4 16 12 12.8 7.6 16l1.7-5.7L5 7.2h5.3L12 2z" stroke="rgba(255,255,255,.85)" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:16px">المزخرف</div>
+          <div class="muted" style="font-size:12px;margin-top:-2px">مولّد زخارف (نصوص قابلة للنسخ)</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="pill c1">نسخ فوري</span>
+        <span class="pill c2">بحث/فلترة</span>
+        <span class="pill c3">عربي + لاتيني</span>
+        <span class="pill c4">ملف واحد</span>
+      </div>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="card">
-    <label class="muted" for="src">اكتب النص هنا:</label>
-    <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
-    <div class="row" style="margin-top:8px">
-      <input id="filter" class="input" placeholder="فلترة الأنماط (اكتب: bold, fraktur, عربي, دوائر...)" />
+  <div class="hero">
+    <div class="left">
+      <h1>اكتب النص… وخُد زخارف جاهزة فورًا ✨</h1>
+      <p>أفضل النتائج للاتيني، لكن أضفنا زخارف عربية (إطارات/فواصل/ختم/تاج) + تطويل وتشكيل خفيف.</p>
     </div>
-    <div class="row" style="margin-top:8px">
-      <button id="btnCopyAll" class="btn accent">نسخ كل النتائج</button>
-      <button id="btnClear"   class="btn">مسح</button>
-      <span class="tip">💡 أفضل الزخارف للاتيني؛ للعربي جرّب “تطويل” و”تشكيل خفيف”.</span>
+    <div class="art" aria-hidden="true">
+      <!-- Decorative inline SVG "image" -->
+      <svg width="140" height="46" viewBox="0 0 140 46" fill="none">
+        <path d="M10 23c18-18 28 18 46 0s28 18 46 0 28 18 28 18" stroke="rgba(229,231,235,.75)" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="20" cy="23" r="4" fill="rgba(6,182,212,.65)"/>
+        <circle cx="70" cy="23" r="4" fill="rgba(167,139,250,.65)"/>
+        <circle cx="118" cy="23" r="4" fill="rgba(251,191,36,.55)"/>
+        <path d="M70 6l2.1 6.2H79l-5.5 4 2.1 6.8-5.6-4.1-5.6 4.1 2.1-6.8-5.5-4h6.9L70 6z" fill="rgba(163,230,53,.35)"/>
+      </svg>
     </div>
-    <div class="row" style="margin-top:6px">
-      <label class="pill"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
-      <label class="pill"><input id="optTashkeel" type="checkbox" /> تشكيل خفيف</label>
-      <label class="pill"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
-      <label class="pill"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
-    </div>
-  </section>
+  </div>
 
-  <section class="card">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div class="muted">الأنماط المتاحة</div>
-      <span id="count" class="pill">— نتيجة</span>
-    </div>
-    <div id="list" class="list" aria-live="polite"></div>
-  </section>
+  <div class="grid" style="margin-top:12px">
+    <!-- Left: inputs -->
+    <section class="card">
+      <div class="title">الإدخال <small>اكتب هنا</small></div>
 
-  <section class="card">
-    <h3 style="margin:6px 0">ملاحظات سريعة</h3>
-    <ul style="margin:6px 0 0 0;padding-left:18px;line-height:1.7">
-      <li>بعض الأجهزة قد لا تدعم كل الحروف المظللة (𝔣𝔯𝔞𝔨𝔱𝔲𝔯، 𝓼𝓬𝓻𝓲𝓹𝓽…). لو شكل غريب ظهر، جرّب نمطًا آخر.</li>
-      <li>للعربي: “تطويل” يضيف ـ بين الحروف المناسبة، و“تشكيل خفيف” يضيف حركات متفرقة بدون مبالغة.</li>
-      <li>كل النتائج **نص قابل للنسخ**، مش صور.</li>
+      <label class="muted" for="src">النص:</label>
+      <textarea id="src" rows="4" placeholder="اكتب اسمك، جملة، أو أي نص..."></textarea>
+
+      <div class="row" style="margin-top:10px">
+        <input id="filter" class="input" placeholder="فلترة الأنماط (مثال: bold, عربي, إطار, ختم, دوائر...)" />
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="فلترة سريعة">
+        <button class="tab active" data-tab="all">الكل</button>
+        <button class="tab" data-tab="latin">لاتيني</button>
+        <button class="tab" data-tab="arabic">عربي</button>
+        <button class="tab" data-tab="decor">زخرفة/إطار</button>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="btnCopyAll" class="btn primary">📋 نسخ كل النتائج</button>
+        <button id="btnShuffle" class="btn good">🎲 ترتيب عشوائي</button>
+        <button id="btnClear" class="btn warn">🧹 مسح</button>
+      </div>
+
+      <div class="chips">
+        <label class="chip"><input id="optKashida" type="checkbox" /> تطويل عربي (ـ)</label>
+        <label class="chip"><input id="optTashkeel" type="checkbox" /> تشكيل خفيف</label>
+        <label class="chip"><input id="optDecor1" type="checkbox" /> زخرفة •✧•</label>
+        <label class="chip"><input id="optDecor2" type="checkbox" /> زخرفة ⌯⟡⌯</label>
+        <label class="chip"><input id="optFrame" type="checkbox" /> إطار عربي ⟪ ⟫</label>
+        <label class="chip"><input id="optCrown" type="checkbox" /> تاج 👑</label>
+        <label class="chip"><input id="optSeal" type="checkbox" /> ختم 🪬</label>
+      </div>
+
+      <div class="tip" style="margin-top:10px">
+        💡 ملاحظة: بعض الزخارف (Fraktur/Script…) قد لا تظهر على بعض الأجهزة. للعربي: الإطار/الختم/التاج أكثر ثباتًا من “حروف مزخرفة”.
+      </div>
+    </section>
+
+    <!-- Right: results -->
+    <section class="card">
+      <div class="counter">
+        <div class="title" style="margin:0">النتائج <small>انسخ بضغطة</small></div>
+        <span id="count" class="pill">— نتيجة</span>
+      </div>
+      <div id="list" class="list" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px">
+    <div class="title">ملاحظات سريعة <small>مختصر مفيد</small></div>
+    <ul style="margin:6px 0 0 0; padding-left:18px">
+      <li>كل النتائج <b>نص قابل للنسخ</b> (مش صور).</li>
+      <li>الزخرفة العربية هنا “حليات/إطارات/فواصل” عشان العربي ماعندوش Unicode fancy fonts زي اللاتيني بشكل مضمون على كل الأجهزة.</li>
+      <li>لو عايز أسماء أقسام/ثيمات… ابعتلي مثال وأنا أضيف ستايلات إضافية بنفس الأسلوب.</li>
     </ul>
   </section>
 </main>
+
+<div class="toast" id="toast"></div>
 
 <script>
 /* ========= Helpers ========= */
 const $ = sel => document.querySelector(sel);
 const src = $('#src'), list = $('#list'), countEl = $('#count'), filterEl = $('#filter');
 const optK = $('#optKashida'), optT = $('#optTashkeel'), optD1 = $('#optDecor1'), optD2 = $('#optDecor2');
+const optFrame = $('#optFrame'), optCrown = $('#optCrown'), optSeal = $('#optSeal');
+
+const toastWrap = $('#toast');
+function toast(msg, type='info'){
+  const el = document.createElement('div');
+  el.className = 't ' + (type==='good'?'good':type==='warn'?'warn':'');
+  el.innerHTML = `<div class="dot"></div><div style="font-size:13px;line-height:1.5">${escapeHtml(msg)}</div>`;
+  toastWrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(6px)'; }, 1800);
+  setTimeout(()=>{ el.remove(); }, 2200);
+}
 
 const AR_LET = /[\u0621-\u064A]/;
-function isArabic(ch){ return AR_LET.test(ch); }
+function isArabicChar(ch){ return AR_LET.test(ch); }
 
 /* ========= Unicode Maps (Latin) ========= */
 const base = {
@@ -99,6 +420,7 @@ const base = {
   l: 'abcdefghijklmnopqrstuvwxyz',
   d: '0123456789'
 };
+
 function mapByOffset(txt, offU, offL, offD){
   let out = '';
   for (const ch of txt){
@@ -111,7 +433,6 @@ function mapByOffset(txt, offU, offL, offD){
   return out;
 }
 
-// Special maps (script/fraktur exceptions, circled, small, upside)
 const OV_FRK = { 'C':'\u212D','H':'\u210C','I':'\u2111','R':'\u211C','Z':'\u2128' };
 const OV_SCR = { 'B':'\u212C','E':'\u2130','F':'\u2131','H':'\u210B','I':'\u2110','L':'\u2112','M':'\u2133','R':'\u211B' };
 
@@ -119,11 +440,9 @@ function mapScript(txt){
   let out='';
   for (const ch of txt){
     const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
-    if (iu>-1){
-      out += OV_SCR[ch] || String.fromCodePoint(0x1D49C + iu);
-    } else if (il>-1){
-      out += String.fromCodePoint(0x1D4B6 + il);
-    } else out += ch;
+    if (iu>-1) out += OV_SCR[ch] || String.fromCodePoint(0x1D49C + iu);
+    else if (il>-1) out += String.fromCodePoint(0x1D4B6 + il);
+    else out += ch;
   }
   return out;
 }
@@ -131,11 +450,9 @@ function mapFraktur(txt){
   let out='';
   for (const ch of txt){
     const iu = base.u.indexOf(ch), il = base.l.indexOf(ch);
-    if (iu>-1){
-      out += OV_FRK[ch] || String.fromCodePoint(0x1D504 + iu);
-    } else if (il>-1){
-      out += String.fromCodePoint(0x1D51E + il);
-    } else out += ch;
+    if (iu>-1) out += OV_FRK[ch] || String.fromCodePoint(0x1D504 + iu);
+    else if (il>-1) out += String.fromCodePoint(0x1D51E + il);
+    else out += ch;
   }
   return out;
 }
@@ -153,7 +470,6 @@ function mapCircled(txt){
   return out;
 }
 
-// Tiny superscripts (approx)
 const SUP = {
   a:'ᵃ',b:'ᵇ',c:'ᶜ',d:'ᵈ',e:'ᵉ',f:'ᶠ',g:'ᵍ',h:'ʰ',i:'ᶦ',j:'ʲ',k:'ᵏ',l:'ˡ',m:'ᵐ',n:'ⁿ',o:'ᵒ',p:'ᵖ',q:'ᑫ',r:'ʳ',s:'ˢ',t:'ᵗ',u:'ᵘ',v:'ᵛ',w:'ʷ',x:'ˣ',y:'ʸ',z:'ᶻ',
   A:'ᴬ',B:'ᴮ',D:'ᴰ',E:'ᴱ',G:'ᴳ',H:'ᴴ',I:'ᴵ',J:'ᴶ',K:'ᴷ',L:'ᴸ',M:'ᴹ',N:'ᴺ',O:'ᴼ',P:'ᴾ',R:'ᴿ',T:'ᵀ',U:'ᵁ',V:'ⱽ',W:'ᵂ',
@@ -161,26 +477,21 @@ const SUP = {
 };
 function mapSup(txt){ return [...txt].map(ch=>SUP[ch]||ch).join(''); }
 
-// Small-caps (approx using Unicode)
 const SC = {'a':'ᴀ','b':'ʙ','c':'ᴄ','d':'ᴅ','e':'ᴇ','f':'ꜰ','g':'ɢ','h':'ʜ','i':'ɪ','j':'ᴊ','k':'ᴋ','l':'ʟ','m':'ᴍ','n':'ɴ','o':'ᴏ','p':'ᴘ','q':'ǫ','r':'ʀ','s':'s','t':'ᴛ','u':'ᴜ','v':'ᴠ','w':'ᴡ','x':'x','y':'ʏ','z':'ᴢ'};
 function mapSmallCaps(txt){ return [...txt].map(ch=>SC[ch]||SC[ch?.toLowerCase()]||ch).join(''); }
 
-// Upside-down
 const UP = {'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'ן','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z',
 'A':'∀','B':'ꓭ','C':'Ɔ','D':'◖','E':'Ǝ','F':'Ⅎ','G':'⅁','H':'H','I':'I','J':'ſ','K':'ʞ','L':'˥','M':'W','N':'N','O':'O','P':'Ԁ','Q':'Ό','R':'ᴚ','S':'S','T':'⊥','U':'∩','V':'Λ','W':'M','X':'X','Y':'⅄','Z':'Z',
 '0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6'};
-function mapUpside(txt){
-  return [...txt].reverse().map(ch=>UP[ch]||ch).join('');
-}
+function mapUpside(txt){ return [...txt].reverse().map(ch=>UP[ch]||ch).join(''); }
 
 /* ========= Arabic helpers ========= */
 function applyKashida(s){
-  // أضف ـ بين الحروف العربية المتجاورة فقط
   const chars = [...s];
   let out = '';
   for (let i=0;i<chars.length;i++){
     out += chars[i];
-    if ( AR_LET.test(chars[i]) && AR_LET.test(chars[i+1]||'') ) out += '\u0640'; // ـ
+    if (AR_LET.test(chars[i]) && AR_LET.test(chars[i+1]||'')) out += '\u0640';
   }
   return out;
 }
@@ -193,6 +504,32 @@ function applyTashkeelLight(s){
   }
   return out;
 }
+
+/* Arabic decorations (safe + visible) */
+function arabicFrame(s){
+  // Ornate Arabic-ish frame using safe glyphs
+  const top = '┏━━━❖━━━┓';
+  const bot = '┗━━━❖━━━┛';
+  return `${top}\n${s}\n${bot}`;
+}
+function arabicRibbon(s){
+  // Banner-like
+  return `❝ ${s} ❞`;
+}
+function arabicSeal(s){
+  // stamp
+  return `🪄【 ${s} 】🪄`;
+}
+function arabicCrown(s){
+  return `👑 ${s} 👑`;
+}
+function arabicRosette(s){
+  // rosettes + separators
+  return `༺✦ ${s} ✦༻`;
+}
+function arabicDots(s){
+  return `• ─── ${s} ─── •`;
+}
 function decorate(s,mode){
   if(!s.trim()) return s;
   if(mode===1) return `•✧ ${s} ✧•`;
@@ -202,80 +539,135 @@ function decorate(s,mode){
 
 /* ========= Styles ========= */
 const STYLES = [
-  {id:'plain',    name:'عادي (بدون تغيير)', fn:(t)=>t},
-  {id:'bold',     name:'سميك Bold',          fn:(t)=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE)},
-  {id:'italic',   name:'مائل Italic',        fn:(t)=>mapByOffset(t,0x1D434,0x1D44E,null)},
-  {id:'boldit',   name:'سميك مائل',          fn:(t)=>mapByOffset(t,0x1D468,0x1D482,null)},
-  {id:'sansb',    name:'Sans عريض',          fn:(t)=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC)},
-  {id:'mono',     name:'Monospace',          fn:(t)=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6)},
-  {id:'script',   name:'Script مزخرف',       fn:mapScript},
-  {id:'frak',     name:'Fraktur',            fn:mapFraktur},
-  {id:'ds',       name:'Double‑Struck',      fn:(t)=>mapByOffset(t,0x1D538,0x1D552,0x1D7D8)},
-  {id:'circ',     name:'حروف داخل دوائر',    fn:mapCircled},
-  {id:'sup',      name:'حجم صغير (Superscript)', fn:mapSup},
-  {id:'sc',       name:'Small‑Caps (تقريبي)', fn:mapSmallCaps},
-  {id:'flip',     name:'مقلوب (Upside‑Down)', fn:mapUpside},
-  // Arabic-oriented
-  {id:'kashida',  name:'عربي — تطويل (ـ)',  fn:applyKashida},
-  {id:'tashkeel', name:'عربي — تشكيل خفيف',  fn:applyTashkeelLight},
+  // meta categories: latin/arabic/decor
+  {id:'plain',    cat:'all',    name:'عادي (بدون تغيير)', fn:(t)=>t},
+
+  // Latin
+  {id:'bold',     cat:'latin',  name:'Bold — سميك',          fn:(t)=>mapByOffset(t,0x1D400,0x1D41A,0x1D7CE)},
+  {id:'italic',   cat:'latin',  name:'Italic — مائل',        fn:(t)=>mapByOffset(t,0x1D434,0x1D44E,null)},
+  {id:'boldit',   cat:'latin',  name:'Bold Italic — سميك مائل',fn:(t)=>mapByOffset(t,0x1D468,0x1D482,null)},
+  {id:'sansb',    cat:'latin',  name:'Sans Bold — عريض',     fn:(t)=>mapByOffset(t,0x1D5D4,0x1D5EE,0x1D7EC)},
+  {id:'mono',     cat:'latin',  name:'Monospace — ثابت',      fn:(t)=>mapByOffset(t,0x1D670,0x1D68A,0x1D7F6)},
+  {id:'script',   cat:'latin',  name:'Script — مزخرف',       fn:mapScript},
+  {id:'frak',     cat:'latin',  name:'Fraktur — زخرفة قديمة', fn:mapFraktur},
+  {id:'ds',       cat:'latin',  name:'Double-Struck — رياضي', fn:(t)=>mapByOffset(t,0x1D538,0x1D552,0x1D7D8)},
+  {id:'circ',     cat:'latin',  name:'Circled — داخل دوائر',   fn:mapCircled},
+  {id:'sup',      cat:'latin',  name:'Superscript — صغير',     fn:mapSup},
+  {id:'sc',       cat:'latin',  name:'Small-Caps — كابيتال صغير', fn:mapSmallCaps},
+  {id:'flip',     cat:'latin',  name:'Upside-Down — مقلوب',    fn:mapUpside},
+
+  // Arabic transforms
+  {id:'kashida',  cat:'arabic', name:'عربي — تطويل (ـ)',        fn:applyKashida},
+  {id:'tashkeel', cat:'arabic', name:'عربي — تشكيل خفيف',       fn:applyTashkeelLight},
+
+  // Arabic decorations (frames/seals)
+  {id:'kashida',  cat:'arabic', name:'عربي — تطويل (ـ)',        fn:applyKashida},
+  {id:'tashkeel', cat:'arabic', name:'عربي — تشكيل خفيف',       fn:applyTashkeelLight},
+
+  // Arabic decorations (frames/seals)
+  {id:'ar_ribbon',cat:'decor',  name:'زخرفة عربية — أقواس ❝ ❞', fn:arabicRibbon},
+  {id:'ar_rosette',cat:'decor', name:'زخرفة عربية — وردة ༺✦༻',  fn:arabicRosette},
+  {id:'ar_dots',  cat:'decor',  name:'زخرفة عربية — فواصل •──•', fn:arabicDots},
+  {id:'ar_seal',  cat:'decor',  name:'زخرفة عربية — ختم 🪬',     fn:arabicSeal},
+  {id:'ar_crown', cat:'decor',  name:'زخرفة عربية — تاج 👑',      fn:arabicCrown},
+  {id:'ar_frame', cat:'decor',  name:'زخرفة عربية — إطار',       fn:arabicFrame},
 ];
+
+let activeTab = 'all';
 
 /* ========= Render ========= */
 function genAll(){
   const raw = src.value || '';
+  const q = (filterEl.value||'').trim().toLowerCase();
+
   const mods = {
     k: optK.checked,
     t: optT.checked,
     d1: optD1.checked,
     d2: optD2.checked,
+    frame: optFrame.checked,
+    crown: optCrown.checked,
+    seal: optSeal.checked,
   };
-  const q = (filterEl.value||'').trim().toLowerCase();
-  const results = [];
 
+  const results = [];
   for (const st of STYLES){
-    if (q && !(`${st.id} ${st.name}`.toLowerCase().includes(q))) continue;
+    // tab filter
+    if (activeTab !== 'all'){
+      if (activeTab === 'latin' && st.cat !== 'latin') continue;
+      if (activeTab === 'arabic' && st.cat !== 'arabic') continue;
+      if (activeTab === 'decor' && st.cat !== 'decor') continue;
+    }
+
+    // text filter
+    if (q && !(`${st.id} ${st.name} ${st.cat}`.toLowerCase().includes(q))) continue;
+
     let out = st.fn(raw);
-    // optional decorations for Arabic/any
+
+    // optional global Arabic-ish mods (apply to all outputs)
     if (mods.k && st.id!=='kashida') out = applyKashida(out);
     if (mods.t && st.id!=='tashkeel') out = applyTashkeelLight(out);
+
+    // extra decorations checkboxes
     if (mods.d1) out = decorate(out,1);
     if (mods.d2) out = decorate(out,2);
+    if (mods.frame) out = arabicFrame(out);
+    if (mods.crown) out = arabicCrown(out);
+    if (mods.seal) out = arabicSeal(out);
 
     results.push({id:st.id, name:st.name, text:out});
   }
 
-  list.innerHTML = results.map(r=>`
+  list.innerHTML = results.map((r, idx)=>`
     <div class="item">
       <div class="head">
-        <div class="name">${r.name}</div>
+        <div class="name">${escapeHtml(r.name)}</div>
         <div class="tools">
-          <button class="btn" data-copy="${escapeHtml(r.text)}">نسخ</button>
+          <button class="btn" data-i="${idx}">نسخ</button>
         </div>
       </div>
       <div class="out">${escapeHtml(r.text) || '<span class="muted">—</span>'}</div>
     </div>
   `).join('');
 
-  // bind copy
-  list.querySelectorAll('[data-copy]').forEach(btn=>{
+  // bind copy (store texts in closure instead of data attribute)
+  const buttons = list.querySelectorAll('button[data-i]');
+  buttons.forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const txt = btn.getAttribute('data-copy');
-      copyText(decodeHtml(txt));
-      btn.textContent='✓ تم النسخ'; setTimeout(()=>btn.textContent='نسخ',900);
+      const i = Number(btn.getAttribute('data-i'));
+      const txt = results[i]?.text ?? '';
+      copyText(txt);
+      toast('تم النسخ ✅', 'good');
     });
   });
 
   countEl.textContent = results.length + ' نتيجة';
 }
+
 function copyText(s){
   if (navigator.clipboard?.writeText) navigator.clipboard.writeText(s);
   else {
-    const t=document.createElement('textarea'); t.value=s; document.body.appendChild(t);
-    t.select(); document.execCommand('copy'); t.remove();
+    const t=document.createElement('textarea');
+    t.value=s;
+    t.style.position='fixed';
+    t.style.opacity='0';
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand('copy');
+    t.remove();
   }
 }
-function escapeHtml(s){ return s.replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
-function decodeHtml(s){ return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'); }
+
+/* Fix: escape/decode */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[m]));
+}
 
 /* ========= Events ========= */
 ['input','change'].forEach(ev=>{
@@ -285,24 +677,60 @@ function decodeHtml(s){ return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').repl
   optT.addEventListener(ev, genAll);
   optD1.addEventListener(ev, genAll);
   optD2.addEventListener(ev, genAll);
+  optFrame.addEventListener(ev, genAll);
+  optCrown.addEventListener(ev, genAll);
+  optSeal.addEventListener(ev, genAll);
 });
 
 document.getElementById('btnCopyAll').onclick = ()=>{
-  const texts=[...list.querySelectorAll('.out')].map(d=>d.textContent).join('\n');
-  copyText(texts); alert('تم نسخ كل النتائج.');
-};
-document.getElementById('btnClear').onclick = ()=>{
-  src.value=''; genAll();
+  const texts = [...list.querySelectorAll('.out')].map(d=>d.textContent).join('\n');
+  if (!texts.trim()){
+    toast('مفيش حاجة تتنسخ… اكتب نص الأول 🙂', 'warn');
+    return;
+  }
+  copyText(texts);
+  toast('تم نسخ كل النتائج 📋', 'good');
 };
 
-// Load sample + autosave
-const KEY='mazakhref_input_v1';
+document.getElementById('btnClear').onclick = ()=>{
+  src.value='';
+  genAll();
+  toast('اتمسح ✅', 'good');
+};
+
+document.getElementById('btnShuffle').onclick = ()=>{
+  const items = [...STYLES];
+  // Fisher-Yates
+  for (let i=items.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [items[i],items[j]]=[items[j],items[i]];
+  }
+  // keep plain first always (better UX)
+  const plain = items.find(x=>x.id==='plain');
+  const rest = items.filter(x=>x.id!=='plain');
+  STYLES.length=0;
+  STYLES.push(plain, ...rest);
+  genAll();
+  toast('تم تغيير ترتيب الأنماط 🎲', 'good');
+};
+
+/* Tabs */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    activeTab = t.getAttribute('data-tab') || 'all';
+    genAll();
+  });
+});
+
+/* Autosave */
+const KEY='mazakhref_input_v2_singlefile';
 src.value = localStorage.getItem(KEY) || '';
 src.addEventListener('input', ()=>localStorage.setItem(KEY, src.value));
 
-// initial
+/* initial */
 genAll();
 </script>
-
 </body>
 </html>
